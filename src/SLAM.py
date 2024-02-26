@@ -1,77 +1,9 @@
-from torch import nn, Tensor
-from LinearProjector import LinearProjector
-from transformers import HubertModel, Wav2Vec2FeatureExtractor
-
-
-class Encoder(nn.Module):
-    def __init__(self, sampling_rate, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-        self.sampling_rate = sampling_rate
-        self.feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained("facebook/hubert-base-ls960")
-
-        # TODO: find a way to not use the ft version
-        self.model = HubertModel.from_pretrained("facebook/hubert-large-ls960-ft")
-        self.output_dim = self.model.config.hidden_size
-
-    def forward(self, raw_speech):
-
-        features = self.feature_extractor(
-            raw_speech=raw_speech,
-            sampling_rate=self.sampling_rate,
-            padding=True,
-            return_tensors="pt",
-        )
-
-        return self.model(features.input_values).last_hidden_state
-
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
-class Decoder(nn.Module):
-    def __init__(self, model_name: str, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
 
-        self.prompt_template = "USER:{speech_embeddings}Transcribe speech to text ASSISTANT:"
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(model_name)
-
-    def forward(self, speech_embeddings):
-
-        (
-            tokens_before_speech_embeddings,
-            tokens_after_speech_embeddings,
-        ) = self.prompt_template.split("{speech_embeddings}")
-
-        # tokenizing prompt
-        tokens_before_speech_embeddings = self.tokenizer(
-            tokens_before_speech_embeddings,
-            return_tensors="pt"
-        ).input_ids
-        tokens_after_speech_embeddings = self.tokenizer(
-            tokens_after_speech_embeddings,
-            return_tensors="pt"
-        ).input_ids
-
-        # droping EOS token
-        tokens_before_speech_embeddings = tokens_before_speech_embeddings[::, :-1]
-        tokens_after_speech_embeddings = tokens_after_speech_embeddings[::, :-1]
-
-        # generating prompt embeddings
-        prompt_embeddings_before_speech_embeddings = self.model.get_input_embeddings()(tokens_before_speech_embeddings)
-        prompt_embeddings_after_speech_embeddings = self.model.get_input_embeddings()(tokens_after_speech_embeddings)
-
-        # concatenating prompt_embeddings and speech_embeddings into a single tensor
-        inputs_embeds = torch.cat(
-            (
-                prompt_embeddings_before_speech_embeddings,
-                speech_embeddings,
-                prompt_embeddings_after_speech_embeddings,
-            ),
-            dim=1,
-        )
-
-        # generate next token
-        return self.model(inputs_embeds=inputs_embeds).logits
+from torch import nn, Tensor
+from .Encoder import Encoder
+from .Decoder import Decoder
+from .LinearProjector import LinearProjector
 
 
 class SLAM(nn.Module):
