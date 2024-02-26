@@ -11,7 +11,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Thytu/SLAM-ASR">
-    <img src="https://i.ibb.co/RpcXwC5/SLAM-ASR-logo.png" alt="Logo" width="200" height="200">
+    <img src="https://i.ibb.co/CvLbGX6/SLAM-ASR-logo-v2.png" alt="Logo" width="200" height="200">
   </a>
 
   <h3 align="center" style="font-size: 200%">SLAM-ASR</h3>
