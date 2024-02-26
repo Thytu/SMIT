@@ -14,10 +14,10 @@
     <img src="https://i.ibb.co/RpcXwC5/SLAM-ASR-logo.png" alt="Logo" width="200" height="200">
   </a>
 
-  <h3 align="center">SLAM-ASR</h3>
+  <h3 align="center" style="font-size: 200%">SLAM-ASR</h3>
 
   <p align="center">
-    Bringing audio to LLM: A fine-tuned LLM for ASR
+    <b> Bringing audio to LLM: A fine-tuned LLM for ASR</b>
     <br />
     <a href="#usage"><strong>Explore the docs »</strong></a>
     <br />
