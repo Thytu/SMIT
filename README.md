@@ -119,6 +119,7 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 - [ ] Overfeat the model on a subset of librispeech
 
 ### Distribution
+- [ ] Write a DVC pipe to easily reproduce results
 - [ ] Write a proper README
 - [ ] Upload model to Hugging-Face
 - [ ] Create a Hugging-Face Space for the model
