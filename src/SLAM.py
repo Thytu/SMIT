@@ -4,6 +4,7 @@ from torch import nn, Tensor
 from .Encoder import Encoder
 from .Decoder import Decoder
 from .LinearProjector import LinearProjector
+from .FramesDownSampler import FramesDownSampler
 
 
 class SLAM(nn.Module):
@@ -11,7 +12,7 @@ class SLAM(nn.Module):
         super().__init__(*args, **kwargs)
 
         self.encoder = Encoder(sampling_rate=16_000)
-
+        self.down_sampler = FramesDownSampler(k=5)
         self.decoder = Decoder(model_name="microsoft/phi-2")
 
         self.linear_projector = LinearProjector(
@@ -24,9 +25,12 @@ class SLAM(nn.Module):
     def forward(self, raw_speech: Tensor) -> Tensor:
 
         speech_embeddings = self.encoder(raw_speech)
-        speech_embeddings = self.linear_projector(speech_embeddings)
 
-        logits = self.decoder(speech_embeddings=speech_embeddings)
+        down_sampled_speech_embeddings = self.down_sampler(speech_embeddings)
+
+        projected_speech_embeddings = self.linear_projector(down_sampled_speech_embeddings)
+
+        logits = self.decoder(speech_embeddings=projected_speech_embeddings)
 
         return logits
 
