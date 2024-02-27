@@ -3,14 +3,16 @@ from transformers import HubertModel, Wav2Vec2FeatureExtractor
 
 
 class Encoder(nn.Module):
+
+
     def __init__(self, sampling_rate, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.sampling_rate = sampling_rate
-        self.feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained("facebook/hubert-base-ls960")
 
         # TODO: find a way to not use the ft version
         self.model = HubertModel.from_pretrained("facebook/hubert-large-ls960-ft")
+        self.feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained("facebook/hubert-base-ls960")
         self.output_dim = self.model.config.hidden_size
 
     def forward(self, raw_speech):
