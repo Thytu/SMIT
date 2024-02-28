@@ -129,7 +129,11 @@ if __name__ == "__main__":
     from Decoder import Decoder
 
 
-    _dataset = load_processed_dataset()
+    _dataset = load_processed_dataset(
+        train_split_size="[:1%]",
+        test_split_size="[:10%]",
+        validation_split_size="[:10%]",
+    )
 
     rand_int = random.randint(0, len(_dataset['train'])-1)
 
@@ -149,4 +153,4 @@ if __name__ == "__main__":
             fn_kwargs={"processor": processor},
         )
 
-    print("After mapping:", _dataset['train'][rand_int])
+    print("After mapping:", _dataset['train'][rand_int].keys())
