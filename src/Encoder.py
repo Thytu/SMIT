@@ -1,4 +1,4 @@
-from torch import nn
+from torch import nn, Tensor
 from transformers import HubertModel, Wav2Vec2FeatureExtractor
 
 
@@ -15,7 +15,7 @@ class Encoder(nn.Module):
         self.feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained("facebook/hubert-base-ls960")
         self.output_dim = self.model.config.hidden_size
 
-    def forward(self, raw_speech):
+    def forward(self, raw_speech: Tensor) -> Tensor:
 
         features = self.feature_extractor(
             raw_speech=raw_speech,
