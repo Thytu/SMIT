@@ -10,6 +10,10 @@ class Decoder(nn.Module):
 
         self.prompt_template = "USER:{speech_embeddings}Transcribe speech to text ASSISTANT:"
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+
         self.model: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(model_name)
 
     def forward(self, speech_embeddings):
