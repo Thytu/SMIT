@@ -108,10 +108,12 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 
 ### Model
 - [ ] `SLAM` must accepts a batched tensor as input (currently expects a list representing a single audio sample)
+- [ ] `SLAM.encoder` should not have to use the fined-tunable version of `hubert-large-ls960`
 - [ ] `SLAM.generate_transcript` method must be autoregressive and fully transcribe the input audio
 
 ### Data
 - [ ] Write the data-preprocessing functions
+- [ ] data-preprocessing must capitalize the text properly (not all cap)
 - [ ] Export processed dataset locally to be loaded at training time
 
 ### Training
@@ -121,6 +123,7 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 ### Distribution
 - [ ] Write a DVC pipe to easily reproduce results
 - [ ] Write a proper README
+- [ ] Write a "How to use the model" doc with everything required for inference (i.e using feature_extractor)
 - [ ] Upload model to Hugging-Face
 - [ ] Create a Hugging-Face Space for the model
 - [ ] Record a Video reproducing the projects
