@@ -1,7 +1,7 @@
 import torch
 
 from dataclasses import dataclass
-from typing import List, Tuple, Dict, Union
+from typing import List, Dict, Union
 from transformers import Wav2Vec2Processor
 from datasets import Dataset, load_dataset, Audio
 
@@ -46,9 +46,14 @@ def load_processed_dataset(
     common_voice_validation = load_dataset(LIBRISPEECH_ASR, "all", split="test.other" + (validation_split_size if validation_split_size is not None else ""))
 
     # TODO: I don't think I need to do that as I can directly use sample["audio"]["array"]
-    for _dataset in (common_voice_train, common_voice_test, common_voice_validation):
-        _dataset = _dataset.remove_columns(COLUMNS_TO_DROP)
-        _dataset = _dataset.cast_column("audio", Audio(sampling_rate=SAMPLING_RATE))
+    common_voice_train = common_voice_train.remove_columns(COLUMNS_TO_DROP)
+    common_voice_train = common_voice_train.cast_column("audio", Audio(sampling_rate=SAMPLING_RATE))
+
+    common_voice_test = common_voice_test.remove_columns(COLUMNS_TO_DROP)
+    common_voice_test = common_voice_test.cast_column("audio", Audio(sampling_rate=SAMPLING_RATE))
+
+    common_voice_validation = common_voice_validation.remove_columns(COLUMNS_TO_DROP)
+    common_voice_validation = common_voice_validation.cast_column("audio", Audio(sampling_rate=SAMPLING_RATE))
 
     return {
         "train": common_voice_train.shuffle(),
@@ -58,15 +63,14 @@ def load_processed_dataset(
 
 
 def add_raw_speech_feature_to_dataset(batch, processor):
-
-    audio = batch["audio"]
-
-    batch["input_features"] = processor(
-        audio["array"],
-        sampling_rate=audio["sampling_rate"]
+    value = processor(
+        batch["audio"]["array"],
+        sampling_rate=batch["audio"]["sampling_rate"]
     ).input_values[0]
 
-    batch["input_length"] = len(batch["input_features"])
+    batch["input_values"] = value
+
+    batch["input_length"] = len(batch["input_values"])
 
     batch["labels"] = processor(text=batch["text"]).input_ids
 
@@ -82,7 +86,7 @@ class DataCollator:
     def __call__(self, features: List[Dict[str, Union[List[int], torch.Tensor]]]) -> Dict[str, torch.Tensor]:
 
         # split inputs and labels since they have to be of different lenghts and need different padding methods
-        input_features = [{"input_features": feature["input_features"]} for feature in features]
+        input_features = [{"input_values": feature["input_values"]} for feature in features]
         label_features = [{"input_ids": feature["labels"]} for feature in features]
 
         batch = self.processor.pad(
@@ -106,27 +110,14 @@ class DataCollator:
         return batch
 
 
-
-# from datasets import load_dataset
-
-# model = SLAM()
-
-# librispeech_train = load_dataset("librispeech_asr", "all", split="train.clean.100", trust_remote_code=True)
-
-# sample = next(iter(librispeech_train))["audio"]["array"]
-
-# output = model.generate_transcript(sample)
-
-# print(output)
-
-
-
 if __name__ == "__main__":
 
+    import os
     import random
 
     from Encoder import Encoder
     from Decoder import Decoder
+    from datasets import DatasetDict
 
 
     _dataset = load_processed_dataset(
@@ -146,11 +137,17 @@ if __name__ == "__main__":
         tokenizer=Decoder(model_name="microsoft/phi-2").tokenizer,
     )
 
+    os.makedirs("outputs/dataset/", exist_ok=True)
+
     for set_name in ("train", "test", "validation"):
         _dataset[set_name] = _dataset[set_name].map(
             add_raw_speech_feature_to_dataset,
             remove_columns=_dataset[set_name].column_names,
             fn_kwargs={"processor": processor},
+            num_proc=max(1, os.cpu_count() - 1),
         )
 
-    print("After mapping:", _dataset['train'][rand_int].keys())
+    DatasetDict(_dataset).save_to_disk(
+        dataset_dict_path=f"outputs/dataset/",
+        num_proc=max(1, os.cpu_count() - 1),
+    )
