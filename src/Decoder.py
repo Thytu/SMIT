@@ -94,7 +94,7 @@ class Decoder(nn.Module):
                 attentions=outputs.attentions,
             )
 
-        return output
+        return outputs
 
 
 if __name__ == "__main__":
