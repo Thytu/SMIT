@@ -15,13 +15,17 @@ class Encoder(nn.Module):
         self.feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained("facebook/hubert-base-ls960")
         self.output_dim = self.model.config.hidden_size
 
+    # TODO: add call to self.feature_extractor when using SLAM.generate_transcript
     def forward(self, raw_speech: Tensor) -> Tensor:
+        return self.model(raw_speech).last_hidden_state
 
-        features = self.feature_extractor(
-            raw_speech=raw_speech,
-            sampling_rate=self.sampling_rate,
-            padding=True,
-            return_tensors="pt",
-        )
 
-        return self.model(features.input_values).last_hidden_state
+if __name__ == "__main__":
+    import torch
+
+    dummy_input = torch.randn((8, 258560))
+    encoder = Encoder(sampling_rate=16_000)
+
+    output = encoder(raw_speech=dummy_input)
+
+    print(output.shape)
