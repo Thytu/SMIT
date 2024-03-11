@@ -1,15 +1,19 @@
-import os
-import torch
 import wandb
-import numpy as np
 import functools
+import numpy as np
 
 from SLAM import SLAM
 from typing import Dict
-from data_handler import DataCollator
-from transformers import Wav2Vec2Processor
-from datasets import load_dataset, load_metric, load_from_disk
-from transformers import TrainingArguments, Trainer
+from datasets import load_from_disk
+from evaluate import load as load_metric
+from DataCollator import DataCollator
+from transformers import (
+    Trainer,
+    TrainingArguments,
+    Wav2Vec2Processor,
+    TrainerCallback,
+    EarlyStoppingCallback,
+)
 
 
 def compute_metrics(pred, processor: Wav2Vec2Processor) -> Dict[str, float]:
@@ -46,7 +50,9 @@ def main():
 
     data_collator = DataCollator(
         processor=processor,
-        padding=True,
+        padding_inputs=True,
+        padding_labels='max_length',
+        max_length_labels=512,
     )
 
     dataset = load_from_disk("outputs/dataset/")
@@ -54,28 +60,24 @@ def main():
     train_set = dataset['train']
     test_set = dataset['test']
 
-    # # TODO:
-    # # [X] Only train Linear layers
-    # # [ ] Only train Decoder
-    # # [X] Set batch size as 6
-    # # [X] Use Cross Entropy as loss
-    # # [X] Use AdamW as optimizer (by default)
-    # # [X] max learning rate of 1 × 10−4 without a weight decay
-    # # [ ] warmup at the first 1, 000 steps and then keep the maximum learning rate for training all the time.
-    # # [ ] max training step is set to 100, 000, but we will stop early if the loss on the validation set does not decrease
+    # TODO:
+    # [X] Only train Linear layers
+    # [X] Only train Decoder
+    # [X] Set batch size as 6
+    # [X] Use Cross Entropy as loss
+    # [X] Use AdamW as optimizer (by default)
+    # [X] max learning rate of 1 × 10−4 without a weight decay
+    # [X] warmup at the first 1, 000 steps and then keep the maximum learning rate for training all the time.
+    # [X] max training step is set to 100, 000, but we will stop early if the loss on the validation set does not decrease
 
     training_args = TrainingArguments(
         output_dir="/scratch/SLAM-ASR-outputs/model/",
-        group_by_length=True,
+        # group_by_length=True, # Makes the training init suepr long (~2h)
         per_device_train_batch_size=6,
-        # gradient_accumulation_steps=1,
+        per_device_eval_batch_size=8,
         evaluation_strategy="steps",
-        # gradient_checkpointing=True,
-        # fp16=True,
-        # bf16=True,
+        eval_steps=500,
         save_steps=1000,
-        # eval_steps=500,
-        eval_steps=5000,
         logging_steps=100,
         learning_rate=1e-4,
         max_steps=100_000,
@@ -84,16 +86,18 @@ def main():
         dataloader_num_workers=16,
         report_to="wandb",
         weight_decay=0,
+        load_best_model_at_end=True,
     )
 
     trainer = Trainer(
         model=model,
         data_collator=data_collator,
         args=training_args,
-        compute_metrics=functools.partial(compute_metrics, processor=processor),
+        # compute_metrics=functools.partial(compute_metrics, processor=processor), # creates huge spikes in VRAM uage
         train_dataset=train_set,
-        eval_dataset=test_set, # TODO: fix eval loop
-        tokenizer=processor.feature_extractor, # TODO: Should I really but processor.feature_extractor here?
+        eval_dataset=test_set,
+        tokenizer=processor.feature_extractor,
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
     )
 
     with wandb.init(project="SLAM-ASR") as run:
