@@ -74,13 +74,15 @@ class SLAM(nn.Module):
     def generate_transcript(self, raw_speech: Tensor, max_length: int = 512):
         self._init_processor()
 
+        encoder_input = raw_speech
+
         # create batch size of one if a single sample is provided
-        if len(raw_speech.shape) == 1:
-            raw_speech.unsqueeze(0)
+        if len(encoder_input.shape) == 1:
+            encoder_input = encoder_input.unsqueeze(0)
 
         device_to_use = next(self.parameters()).device
 
-        speech_embeddings = self._prepare_inputs_for_decoder(raw_speech)
+        speech_embeddings = self._prepare_inputs_for_decoder(encoder_input)
 
         inputs_embedding = self.decoder._generate_inputs_embeds(speech_embeddings)
 
@@ -91,11 +93,11 @@ class SLAM(nn.Module):
         stopping_criteria = StoppingCriteriaList([MaxLengthCriteria(max_length=max_length)])
 
         # keep track of which sequences are already finished
-        unfinished_sequences = torch.ones(raw_speech.shape[0], dtype=torch.long, device=device_to_use)
+        unfinished_sequences = torch.ones(encoder_input.shape[0], dtype=torch.long, device=device_to_use)
 
         eos_token_id_tensor = torch.tensor([self.decoder.tokenizer.eos_token_id], device=device_to_use)
 
-        input_ids = torch.empty((raw_speech.size(0), 0), dtype=torch.long, device=device_to_use)
+        input_ids = torch.empty((encoder_input.size(0), 0), dtype=torch.long, device=device_to_use)
 
         while True:
 
@@ -135,6 +137,9 @@ class SLAM(nn.Module):
                 ),
                 dim=1,
             )
+
+        if len(raw_speech.shape) == 1:
+            input_ids = input_ids[0]
 
         return input_ids
 
