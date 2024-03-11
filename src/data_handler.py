@@ -1,7 +1,6 @@
 import torch
 
-from dataclasses import dataclass
-from typing import List, Dict, Union
+from typing import Dict
 from transformers import Wav2Vec2Processor
 from datasets import Dataset, load_dataset, Audio
 
@@ -72,42 +71,11 @@ def add_raw_speech_feature_to_dataset(batch, processor):
 
     batch["input_length"] = len(batch["input_values"])
 
-    batch["labels"] = processor(text=batch["text"]).input_ids
+    batch["labels"] = processor(
+        text=batch["text"].capitalize() + ".",
+    ).input_ids
 
     return batch
-
-
-@dataclass
-class DataCollator:
-
-    processor: Wav2Vec2Processor
-    padding: Union[bool, str] = True
-
-    def __call__(self, features: List[Dict[str, Union[List[int], torch.Tensor]]]) -> Dict[str, torch.Tensor]:
-
-        # split inputs and labels since they have to be of different lenghts and need different padding methods
-        input_features = [{"input_values": feature["input_values"]} for feature in features]
-        label_features = [{"input_ids": feature["labels"]} for feature in features]
-
-        batch = self.processor.pad(
-            input_features,
-            padding=self.padding,
-            return_tensors="pt",
-        )
-
-        labels_batch = self.processor.pad(
-            labels=label_features,
-            padding=self.padding,
-            return_tensors="pt",
-        )
-
-        # replace padding with -100 to ignore loss correctly
-        # TODO: verify the -100, I'm totally not sure about it
-        labels = labels_batch["input_ids"].masked_fill(labels_batch.attention_mask.ne(1), -100)
-
-        batch["labels"] = labels
-
-        return batch
 
 
 if __name__ == "__main__":
@@ -120,11 +88,7 @@ if __name__ == "__main__":
     from datasets import DatasetDict
 
 
-    _dataset = load_processed_dataset(
-        train_split_size="[:1%]",
-        test_split_size="[:10%]",
-        validation_split_size="[:10%]",
-    )
+    _dataset = load_processed_dataset()
 
     rand_int = random.randint(0, len(_dataset['train'])-1)
 
