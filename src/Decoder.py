@@ -74,9 +74,9 @@ class Decoder(nn.Module):
 
             # retrieving only labels and shift so that tokens < n predict n
             idx_to_skip = inputs_embeds.size(1) - transcription_embeddings.size(1)
-            shift_logits = outputs.logits[..., idx_to_skip:-1, :].contiguous()
+            shift_logits = outputs.logits[..., idx_to_skip:-1, :].clone().contiguous()
 
-            shift_labels = labels[..., 1:].contiguous()
+            shift_labels = labels[..., 1:].clone().contiguous()
 
             loss_fct = torch.nn.CrossEntropyLoss(ignore_index=-100)
 
@@ -89,7 +89,7 @@ class Decoder(nn.Module):
             return CausalLMOutputWithPast(
                 loss=loss,
                 logits=outputs.logits,
-                past_key_values=outputs.past_key_values,
+                past_key_values=None,
                 hidden_states=outputs.hidden_states,
                 attentions=outputs.attentions,
             )
