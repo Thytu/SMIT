@@ -2,8 +2,16 @@ import torch
 
 from typing import Optional
 from torch import nn, Tensor
+from dataclasses import dataclass
+from collections import OrderedDict
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.modeling_outputs import CausalLMOutputWithPast
+
+
+@dataclass
+class DecoderInputsEmbedding(OrderedDict):
+    inputs_embeds: Tensor
+    transcription_embeddings: Optional[Tensor] = None
 
 
 class Decoder(nn.Module):
@@ -18,7 +26,9 @@ class Decoder(nn.Module):
 
         self.model: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(model_name)
 
-    def forward(self, speech_embeddings: Tensor, labels: Optional[torch.Tensor] = None):
+    def _generate_inputs_embeds(self, speech_embeddings: Tensor, labels: Optional[torch.Tensor] = None) -> DecoderInputsEmbedding:
+
+        device_to_use = next(self.parameters()).device
 
         (
             tokens_before_speech_embeddings,
@@ -29,11 +39,11 @@ class Decoder(nn.Module):
         tokens_before_speech_embeddings = self.tokenizer(
             tokens_before_speech_embeddings,
             return_tensors="pt"
-        ).input_ids.to(next(self.parameters()).device)
+        ).input_ids.to(device_to_use)
         tokens_after_speech_embeddings = self.tokenizer(
             tokens_after_speech_embeddings,
             return_tensors="pt"
-        ).input_ids.to(next(self.parameters()).device)
+        ).input_ids.to(device_to_use)
 
         # droping EOS token
         tokens_before_speech_embeddings = tokens_before_speech_embeddings[::, :-1]
@@ -53,6 +63,8 @@ class Decoder(nn.Module):
             dim=1,
         )
 
+        transcription_embeddings = None
+
         if labels is not None:
 
             labels_tokens = labels.clone()
@@ -68,12 +80,27 @@ class Decoder(nn.Module):
                 dim=1,
             )
 
-        outputs: CausalLMOutputWithPast = self.model(inputs_embeds=inputs_embeds)
+        return DecoderInputsEmbedding(
+            inputs_embeds=inputs_embeds,
+            transcription_embeddings=transcription_embeddings,
+        )
+
+    def forward(
+        self,
+        speech_embeddings: Tensor = None,
+        inputs_embedding: DecoderInputsEmbedding = None,
+        labels: Optional[torch.Tensor] = None
+    ):
+
+        if inputs_embedding is None:
+            inputs_embedding = self._generate_inputs_embeds(speech_embeddings, labels)
+
+        outputs: CausalLMOutputWithPast = self.model(inputs_embeds=inputs_embedding.inputs_embeds)
 
         if labels is not None:
 
             # retrieving only labels and shift so that tokens < n predict n
-            idx_to_skip = inputs_embeds.size(1) - transcription_embeddings.size(1)
+            idx_to_skip = inputs_embedding.inputs_embeds.size(1) - inputs_embedding.transcription_embeddings.size(1)
             shift_logits = outputs.logits[..., idx_to_skip:-1, :].clone().contiguous()
 
             shift_labels = labels[..., 1:].clone().contiguous()
