@@ -61,7 +61,7 @@ def load_processed_dataset(
     }
 
 
-def add_raw_speech_feature_to_dataset(batch, processor):
+def add_raw_speech_feature_to_dataset(batch, processor: Wav2Vec2Processor):
     value = processor(
         batch["audio"]["array"],
         sampling_rate=batch["audio"]["sampling_rate"]
@@ -74,6 +74,9 @@ def add_raw_speech_feature_to_dataset(batch, processor):
     batch["labels"] = processor(
         text=batch["text"].capitalize() + ".",
     ).input_ids
+
+    if batch["labels"][-1] != processor.tokenizer.eos_token_id:
+        batch["labels"].append(processor.tokenizer.eos_token_id)
 
     return batch
 
