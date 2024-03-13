@@ -6,6 +6,7 @@ from Decoder import Decoder
 from transformers import Wav2Vec2Processor
 from LinearProjector import LinearProjector
 from FramesDownSampler import FramesDownSampler
+from huggingface_hub import PyTorchModelHubMixin
 from transformers.modeling_outputs import CausalLMOutputWithPast
 from transformers.generation import (
     LogitNormalization,
@@ -15,13 +16,13 @@ from transformers.generation import (
 )
 
 
-class SLAM(nn.Module):
-    def __init__(self, *args, **kwargs) -> None:
+class SLAM(nn.Module, PyTorchModelHubMixin):
+    def __init__(self, decode_name: str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.encoder = Encoder(sampling_rate=16_000)
         self.down_sampler = FramesDownSampler(k=5)
-        self.decoder = Decoder(model_name="microsoft/phi-2")
+        self.decoder = Decoder(model_name=decode_name, **kwargs)
         self.linear_projector = LinearProjector(
             input_dim=self.encoder.output_dim,
             output_dim=self.decoder.model.config.hidden_size,
@@ -62,16 +63,14 @@ class SLAM(nn.Module):
         self,
         input_values: Tensor,
         labels: Tensor = None,
-        attention_mask: Tensor = None,
-        input_length: Tensor = None,
-    ) -> Tensor:
+    ) -> CausalLMOutputWithPast:
 
         projected_speech_embeddings = self._prepare_inputs_for_decoder(input_values)
 
         return self.decoder(speech_embeddings=projected_speech_embeddings, labels=labels)
 
     # TODO: change default max_length to decoder's max_length
-    def generate_transcript(self, raw_speech: Tensor, max_length: int = 512):
+    def generate_transcript(self, raw_speech: Tensor, max_length: int = 512) -> Tensor:
         self._init_processor()
 
         encoder_input = raw_speech
