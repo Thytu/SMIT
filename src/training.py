@@ -11,7 +11,6 @@ from transformers import (
     Trainer,
     TrainingArguments,
     Wav2Vec2Processor,
-    TrainerCallback,
     EarlyStoppingCallback,
 )
 
@@ -37,7 +36,7 @@ def compute_metrics(pred, processor: Wav2Vec2Processor) -> Dict[str, float]:
 
 def main():
 
-    model = SLAM()
+    model = SLAM(decode_name="abacaj/phi-2-super")
 
     for name, param in model.named_parameters():
         if not any([linear_indicator in name for linear_indicator in ('fc', 'dense', 'linear')]):
@@ -59,22 +58,14 @@ def main():
 
     train_set = dataset['train']
     test_set = dataset['test']
-
-    # TODO:
-    # [X] Only train Linear layers
-    # [X] Only train Decoder
-    # [X] Set batch size as 6
-    # [X] Use Cross Entropy as loss
-    # [X] Use AdamW as optimizer (by default)
-    # [X] max learning rate of 1 × 10−4 without a weight decay
-    # [X] warmup at the first 1, 000 steps and then keep the maximum learning rate for training all the time.
-    # [X] max training step is set to 100, 000, but we will stop early if the loss on the validation set does not decrease
+    validation_set = dataset['validation']
 
     training_args = TrainingArguments(
         output_dir="/scratch/SLAM-ASR-outputs/model/",
         # group_by_length=True, # Makes the training init suepr long (~2h)
-        per_device_train_batch_size=6,
-        per_device_eval_batch_size=8,
+        bf16=True,
+        per_device_train_batch_size=4,
+        per_device_eval_batch_size=6,
         evaluation_strategy="steps",
         eval_steps=500,
         save_steps=1000,
@@ -97,11 +88,15 @@ def main():
         train_dataset=train_set,
         eval_dataset=test_set,
         tokenizer=processor.feature_extractor,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=5)],
     )
 
     with wandb.init(project="SLAM-ASR") as run:
         trainer.train()
+        trainer.evaluate(
+            eval_dataset=validation_set,
+            metric_key_prefix="validation"
+        )
 
 
 if __name__ == "__main__":
