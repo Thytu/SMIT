@@ -2,7 +2,10 @@ import torch
 
 from torch import nn, Tensor
 from Encoder import Encoder
-from Decoder import Decoder
+from dataclasses import dataclass
+from collections import OrderedDict
+from typing import Optional, List, Union, Dict
+from Decoder import Decoder, DecoderInput
 from transformers import Wav2Vec2Processor
 from LinearProjector import LinearProjector
 from FramesDownSampler import FramesDownSampler
@@ -14,6 +17,15 @@ from transformers.generation import (
     MaxLengthCriteria,
     StoppingCriteriaList,
 )
+
+
+@dataclass
+class SLAMInput(OrderedDict):
+    instruct: str = None
+    instruct_ids: Optional[Union[List[int], Tensor]] = None
+    raw_audio: Optional[Tensor] = None
+    # labels: Optional[str] = None
+
 
 
 class SLAM(nn.Module, PyTorchModelHubMixin):
@@ -39,7 +51,7 @@ class SLAM(nn.Module, PyTorchModelHubMixin):
     def train(self, mode: bool = True):
         super().train(mode)
 
-        # Only train decoder
+        # Only train decoder and linear_projector
         self.encoder.eval()
 
         # Only train Linear layers
@@ -52,24 +64,64 @@ class SLAM(nn.Module, PyTorchModelHubMixin):
     def eval(self):
         return super().eval()
 
-    def _prepare_inputs_for_decoder(self, input_values: Tensor) -> Tensor:
-        speech_embeddings = self.encoder(input_values)
+    # def _prepare_inputs_for_decoder(self, input_values: Tensor) -> Tensor:
+    #     speech_embeddings = self.encoder(input_values)
 
-        down_sampled_speech_embeddings = self.down_sampler(speech_embeddings)
+    #     down_sampled_speech_embeddings = self.down_sampler(speech_embeddings)
 
-        return self.linear_projector(down_sampled_speech_embeddings)
+    #     return self.linear_projector(down_sampled_speech_embeddings)
+
+    def _encode_audio(self, raw_audio: Tensor) -> Tensor:
+        audio_embeddings = self.encoder(raw_audio.unsqueeze(0))
+
+        down_sampled_audio_embeddings = self.down_sampler(audio_embeddings)
+
+        return self.linear_projector(down_sampled_audio_embeddings)[0]
+
+    # TODO LIST
+    # SLAM.forward must accept non-audio input
+    # Add text instruct dataset to dataset
 
     def forward(
         self,
-        input_values: Tensor,
-        labels: Tensor = None,
+        inputs: Union[
+            SLAMInput,
+            Dict[str, Union[str, Tensor, None]],
+            List[SLAMInput],
+            List[Dict[str, Union[str, Tensor, None]]],
+        ],
+        labels: Optional[Tensor] = None,
     ) -> CausalLMOutputWithPast:
 
-        projected_speech_embeddings = self._prepare_inputs_for_decoder(input_values)
+        if isinstance(inputs, (dict, SLAMInput)):
+            inputs = [inputs]
 
-        return self.decoder(speech_embeddings=projected_speech_embeddings, labels=labels)
+        for idx, _input in enumerate(inputs):
+
+            if isinstance(_input, dict):
+                inputs[idx] = SLAMInput(
+                    instruct=_input.get("instruct"),
+                    instruct_ids=_input.get("instruct_ids"),
+                    raw_audio=_input["raw_audio"],
+                )
+
+            if inputs[idx].instruct is None and inputs[idx].instruct_ids is None:
+                raise RuntimeError("SLAMInput must contains either instruct or instruct_ids.")
+
+        if labels is None:
+            labels = [None] * len(inputs)
+
+        inputs = [DecoderInput(
+            instruct=_input.instruct,
+            instruct_ids=_input.instruct_ids,
+            audio_embedding=self._encode_audio(_input.raw_audio) if _input.raw_audio is not None else None,
+            labels=_labels,
+        ) for (_input, _labels) in zip(inputs, labels)]
+
+        return self.decoder(inputs)
 
     # TODO: change default max_length to decoder's max_length
+    # TODO: change function to generic .generate one but it must handles audio as input
     def generate_transcript(self, raw_speech: Tensor, max_length: int = 512) -> Tensor:
         self._init_processor()
 
@@ -148,13 +200,21 @@ if __name__ == "__main__":
 
     device_to_use = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    model = SLAM().to(device_to_use)
+    model = SLAM(decode_name="abacaj/phi-2-super").eval().to(device_to_use)
 
-    dummy_input_values = torch.randn((2, 258560), device=device_to_use)
+    # dummy_input_values = torch.randn((2, 258560), device=device_to_use)
 
-    input_ids = model.generate_transcript(dummy_input_values)
+    dummy_input_values = SLAMInput(
+        instruct=(f"{model.decoder.tokenizer.eos_token}[INST]" " Transcribe speech to text {audio} [/INST]"),
+        raw_audio=torch.randn((258560), device=device_to_use),
+    )
 
-    print(f"{input_ids.shape=}")
+    model.forward(dummy_input_values)
 
-    for _input_ids in input_ids:
-        print("[TRANSCRIPTION]\n-----\n", model.decoder.tokenizer.decode(_input_ids), end="\n-----\n\n")
+    # FIXME
+    # input_ids = model.generate_transcript(dummy_input_values)
+
+    # print(f"{input_ids.shape=}")
+
+    # for _input_ids in input_ids:
+    #     print("[TRANSCRIPTION]\n-----\n", model.decoder.tokenizer.decode(_input_ids), end="\n-----\n\n")

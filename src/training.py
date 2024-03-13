@@ -64,7 +64,8 @@ def main():
         output_dir="/scratch/SLAM-ASR-outputs/model/",
         # group_by_length=True, # Makes the training init suepr long (~2h)
         bf16=True,
-        per_device_train_batch_size=4,
+        per_device_train_batch_size=1,
+        # per_device_train_batch_size=4, # OOM
         per_device_eval_batch_size=6,
         evaluation_strategy="steps",
         eval_steps=500,
@@ -93,10 +94,11 @@ def main():
 
     with wandb.init(project="SLAM-ASR") as run:
         trainer.train()
-        trainer.evaluate(
-            eval_dataset=validation_set,
-            metric_key_prefix="validation"
-        )
+        # trainer.train(resume_from_checkpoint="/scratch/SLAM-ASR-outputs/model/checkpoint-7000/")
+        # trainer.evaluate(
+        #     eval_dataset=validation_set,
+        #     metric_key_prefix="validation"
+        # )
 
 
 if __name__ == "__main__":

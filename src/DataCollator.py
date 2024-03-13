@@ -1,8 +1,10 @@
-from torch import Tensor
+from torch import Tensor, tensor
 from dataclasses import dataclass
 from transformers import Wav2Vec2Processor
 from typing import Optional, Union, List, Dict
 
+
+from SLAM import SLAMInput
 
 @dataclass
 class DataCollator:
@@ -16,27 +18,46 @@ class DataCollator:
     max_length_labels: Optional[int] = None
 
     def __call__(self, features: List[Dict[str, Union[List[int], Tensor]]]) -> Dict[str, Tensor]:
+        # return features
+
+        # return {
+        output = {
+            "inputs": [
+                {
+                    "instruct": feature["inputs"]["instruct"],
+                    "raw_audio": tensor(feature["inputs"]["raw_audio"]) if feature["inputs"]["raw_audio"] is not None else None,
+                } for feature in features
+            ],
+            # ],
+            "labels": [tensor(feature["labels"]) for feature in features],
+        }
+        return output
 
         # split inputs and labels since they have to be of different lenghts and need different padding methods
         input_features = [{"input_values": feature["input_values"]} for feature in features]
         label_features = [{"input_ids": feature["labels"]} for feature in features]
 
-        batch = self.processor.pad(
-            input_features,
-            padding=self.padding_inputs,
-            max_length=self.max_length_inputs,
-            return_tensors="pt",
-        )
+        # SLAMInput(
+        #     prompt=(f"{processor.tokenizer.eos_token}[INST]" " Transcribe speech to text {audio} [/INST]"),
+        #     raw_audio=value,
+        # )
 
-        labels_batch = self.processor.pad(
-            labels=label_features,
-            padding=True,
-            # padding=self.padding_labels,
-            # max_length=self.max_length_labels,
-            return_tensors="pt",
-        )
+        # batch = self.processor.pad(
+        #     input_features,
+        #     padding=self.padding_inputs,
+        #     max_length=self.max_length_inputs,
+        #     return_tensors="pt",
+        # )
 
-        labels = labels_batch["input_ids"].masked_fill(labels_batch.attention_mask.ne(1), -100)
+        # labels_batch = self.processor.pad(
+        #     labels=label_features,
+        #     padding=True,
+        #     # padding=self.padding_labels,
+        #     # max_length=self.max_length_labels,
+        #     return_tensors="pt",
+        # )
+
+        # labels = labels_batch["input_ids"].masked_fill(labels_batch.attention_mask.ne(1), -100)
 
         batch["labels"] = labels
 
