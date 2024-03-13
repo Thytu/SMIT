@@ -15,14 +15,17 @@ class DecoderInputsEmbedding(OrderedDict):
 
 
 class Decoder(nn.Module):
-    def __init__(self, model_name: str, *args, **kwargs) -> None:
+    def __init__(self, model_name: str, prompt_template: Optional[str] = None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
-        self.prompt_template = "USER:{speech_embeddings} Transcribe speech to text ASSISTANT:"
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
+
+        default_prompt_template = (f"{self.tokenizer.eos_token}[INST]" " Transcribe speech to text {speech_embeddings} [/INST]")
+
+        self.prompt_template = prompt_template if prompt_template is not None else default_prompt_template
 
         self.model: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(model_name)
 
@@ -90,47 +93,37 @@ class Decoder(nn.Module):
         speech_embeddings: Tensor = None,
         inputs_embedding: DecoderInputsEmbedding = None,
         labels: Optional[torch.Tensor] = None
-    ):
+    ) -> CausalLMOutputWithPast:
 
         if inputs_embedding is None:
             inputs_embedding = self._generate_inputs_embeds(speech_embeddings, labels)
 
-        outputs: CausalLMOutputWithPast = self.model(inputs_embeds=inputs_embedding.inputs_embeds)
-
         if labels is not None:
-
-            # retrieving only labels and shift so that tokens < n predict n
-            idx_to_skip = inputs_embedding.inputs_embeds.size(1) - inputs_embedding.transcription_embeddings.size(1)
-            shift_logits = outputs.logits[..., idx_to_skip:-1, :].clone().contiguous()
-
-            shift_labels = labels[..., 1:].clone().contiguous()
-
-            loss_fct = torch.nn.CrossEntropyLoss(ignore_index=-100)
-
-            # Flatten the tokens
-            shift_logits = shift_logits.view(-1, shift_logits.size(-1))
-            shift_labels = shift_labels.view(-1).to(shift_logits.device)
-
-            loss = loss_fct(shift_logits, shift_labels)
-
-            return CausalLMOutputWithPast(
-                loss=loss,
-                logits=outputs.logits,
-                past_key_values=None,
-                hidden_states=outputs.hidden_states,
-                attentions=outputs.attentions,
+            size_of_prompt = inputs_embedding.inputs_embeds.size(1) - inputs_embedding.transcription_embeddings.size(1)
+            labels = torch.cat(
+                (
+                    torch.full(
+                        size=(inputs_embedding.inputs_embeds.size(0), size_of_prompt),
+                        fill_value=-100,
+                        device=inputs_embedding.inputs_embeds.device
+                    ),
+                    labels,
+                ),
+                dim=1
             )
 
-        return outputs
+        return self.model(inputs_embeds=inputs_embedding.inputs_embeds, labels=labels)
 
 
 if __name__ == "__main__":
     import torch
 
-    dummy_input = torch.randn([8, 161, 2560])
+    device_to_use = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    decoder = Decoder(model_name="microsoft/phi-2")
+    dummy_input = torch.randn([8, 500, 2560], device=device_to_use)
+
+    decoder = Decoder(model_name="microsoft/phi-2").to(device_to_use)
 
     output = decoder(dummy_input)
 
-    print(f"{output.shape=}")
+    print(f"{output.logits.shape=}")
