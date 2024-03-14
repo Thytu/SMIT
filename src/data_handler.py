@@ -105,11 +105,13 @@ if __name__ == "__main__":
     from datasets import DatasetDict
 
     MAX_LENGTH = 2048
+    SAFETY_MARGIN = 350 # for the prompt template
+    # FIXME: I shouldn't need such a huge sage margin
 
     _dataset = load_processed_librispeech_dataset(
-        # train_split_size="[:100]",
-        # test_split_size="[:100]",
-        # validation_split_size="[:100]",
+        # train_split_size="[:50]",
+        # test_split_size="[:50]",
+        # validation_split_size="[:50]",
     )
 
     instruct_dataset = load_processed_instruct_dataset(test_size=0.2)
@@ -130,9 +132,6 @@ if __name__ == "__main__":
 
     for set_name in ("train", "test", "validation"):
 
-        # _dataset[set_name] = _dataset[set_name][:min(len(instruct_dataset[set_name]), len(_dataset[set_name]))]
-        # instruct_dataset[set_name] = instruct_dataset[set_name][:min(len(instruct_dataset[set_name]), len(_dataset[set_name]))]
-
         nb_samples_from_each_dataset = min(len(instruct_dataset[set_name]), len(_dataset[set_name]))
         instruct_dataset[set_name] = instruct_dataset[set_name].select([i for i in range(nb_samples_from_each_dataset)])
 
@@ -140,7 +139,7 @@ if __name__ == "__main__":
             process_instruct_dataset,
             remove_columns=instruct_dataset[set_name].column_names,
             num_proc=max(1, os.cpu_count() - 1),
-        ).filter(lambda sample: len(sample["labels"]) > 0 and len(sample["inputs"]["instruct"]) + len(sample["labels"]) > MAX_LENGTH)
+        ).filter(lambda sample: len(sample["labels"]) > 0 and len(sample["inputs"]["instruct"]) + len(sample["labels"]) < MAX_LENGTH - SAFETY_MARGIN)
 
         # Update after filtering instruct dataset
         nb_samples_from_each_dataset = min(len(instruct_dataset[set_name]), len(_dataset[set_name]))
