@@ -87,6 +87,7 @@ class Decoder(nn.Module):
     def forward(
         self,
         inputs: List[DecoderInput],
+        apply_prompt_formating: bool = True,
     ) -> CausalLMOutputWithPast:
 
         device_to_use = next(self.parameters()).device
@@ -109,7 +110,8 @@ class Decoder(nn.Module):
 
         # TODO: change 2048 to model's max len
         labels = None
-        max_length = 2048
+        # max_length = 2048 if len(inputs) > 1 else None
+        max_length = 2048# if len(inputs) > 1 else None
         inputs_embeddings = []
         pad_embedding: Tensor = self.model.get_input_embeddings()(torch.tensor(self.tokenizer.pad_token_id, device=device_to_use))
 
@@ -131,7 +133,8 @@ class Decoder(nn.Module):
                 ))
 
             # Applying decoder prompt format around the instruct
-            _input.instruct = self.instruct_template.format(instruct=_input.instruct)
+            if apply_prompt_formating:
+                _input.instruct = self.instruct_template.format(instruct=_input.instruct)
 
             if "{audio}" in _input.instruct:
                 embbeding = self._generate_embedding_with_audio(
@@ -143,7 +146,7 @@ class Decoder(nn.Module):
             else:
                 embbeding = self._generate_embedding_without_audio(prompt=_input.instruct, device_to_use=device_to_use)
 
-            if embbeding.size(0) > max_length:
+            if max_length is not None and embbeding.size(0) > max_length:
                 raise RuntimeError(f"Received an input that its embedding is larger than {max_length=}.")
 
             if _input.labels is not None:
@@ -184,13 +187,11 @@ class Decoder(nn.Module):
 
                 labels.append(_labels)
 
-            try:
+            if max_length is not None:
                 embbeding = torch.cat((
                     embbeding,
                     pad_embedding.repeat([max_length - embbeding.size(0), 1]),
                 ))
-            except Exception as e:
-                raise RuntimeError(f"{e=}\t{_input['instruct']=}\t{_input['labels']=}\t{len(_input['instruct'])=}\t{len(_input['labels'])=}")
 
             inputs_embeddings.append(embbeding)
 
@@ -198,7 +199,7 @@ class Decoder(nn.Module):
 
         if labels is not None:
 
-            label_max_length = 2048
+            label_max_length = max_length
             # label_max_length = max([len(_label) for _label in labels])
             labels = [torch.cat([
                 _label,

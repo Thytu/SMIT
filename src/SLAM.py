@@ -27,8 +27,7 @@ class SLAMInput(OrderedDict):
     # labels: Optional[str] = None
 
 
-
-class SLAM(nn.Module, PyTorchModelHubMixin):
+class SLAM(nn.Module):
     def __init__(self, decode_name: str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -64,23 +63,12 @@ class SLAM(nn.Module, PyTorchModelHubMixin):
     def eval(self):
         return super().eval()
 
-    # def _prepare_inputs_for_decoder(self, input_values: Tensor) -> Tensor:
-    #     speech_embeddings = self.encoder(input_values)
-
-    #     down_sampled_speech_embeddings = self.down_sampler(speech_embeddings)
-
-    #     return self.linear_projector(down_sampled_speech_embeddings)
-
     def _encode_audio(self, raw_audio: Tensor) -> Tensor:
         audio_embeddings = self.encoder(raw_audio.unsqueeze(0))
 
         down_sampled_audio_embeddings = self.down_sampler(audio_embeddings)
 
         return self.linear_projector(down_sampled_audio_embeddings)[0]
-
-    # TODO LIST
-    # SLAM.forward must accept non-audio input
-    # Add text instruct dataset to dataset
 
     def forward(
         self,
@@ -128,14 +116,20 @@ class SLAM(nn.Module, PyTorchModelHubMixin):
         encoder_input = raw_speech
 
         # create batch size of one if a single sample is provided
-        if len(encoder_input.shape) == 1:
-            encoder_input = encoder_input.unsqueeze(0)
+        # if len(encoder_input.shape) == 1:
+        #     encoder_input = encoder_input.unsqueeze(0)
 
         device_to_use = next(self.parameters()).device
 
-        speech_embeddings = self._prepare_inputs_for_decoder(encoder_input)
+        print(f"{encoder_input.shape}")
 
-        inputs_embedding = self.decoder._generate_inputs_embeds(speech_embeddings)
+        speech_embeddings = self._encode_audio(encoder_input)
+
+        decoder_input = DecoderInput(
+            instruct="Transcribe speech to text {audio}",
+            audio_embedding=speech_embeddings,
+        )
+        # inputs_embedding = self.decoder._generate_inputs_embeds(speech_embeddings)
 
         # used to normalize the logits (useful for beam search)
         logits_processor = LogitsProcessorList([LogitNormalization()])
@@ -148,23 +142,30 @@ class SLAM(nn.Module, PyTorchModelHubMixin):
 
         eos_token_id_tensor = torch.tensor([self.decoder.tokenizer.eos_token_id], device=device_to_use)
 
-        input_ids = torch.empty((encoder_input.size(0), 0), dtype=torch.long, device=device_to_use)
+        input_ids = torch.empty((0), dtype=torch.long, device=device_to_use)
+        # input_ids = torch.empty((encoder_input.size(0), 0), dtype=torch.long, device=device_to_use)
+
+        decoder_input.instruct = self.decoder.instruct_template.format(instruct=decoder_input.instruct)
 
         while True:
 
-            outputs: CausalLMOutputWithPast = self.decoder(inputs_embedding=inputs_embedding)
+            # FIXME: shouldn't pad if only one value
+            outputs: CausalLMOutputWithPast = self.decoder(decoder_input, apply_prompt_formating=False)
 
-            next_token_logits = outputs.logits[:, -1, :]
+            next_token_logits = outputs.logits[0, -1, :]
 
             next_tokens_scores = logits_processor(input_ids=None, scores=next_token_logits)
 
             next_tokens = torch.argmax(next_tokens_scores, dim=-1)
 
             # finished sentences should have their next token be a padding token
-            next_tokens = next_tokens * unfinished_sequences + self.decoder.tokenizer.pad_token_id * (1 - unfinished_sequences)
+            # next_tokens = next_tokens * unfinished_sequences + self.decoder.tokenizer.pad_token_id * (1 - unfinished_sequences)
 
             # update generated ids, model inputs, and length for next step
-            input_ids = torch.cat([input_ids, next_tokens[:, None]], dim=-1)
+            # print(f'{next_tokens[:, None].shape=}')
+            # print(f'{next_tokens.shape=}')
+            input_ids = torch.cat([input_ids, torch.tensor([next_tokens], device=input_ids.device)], dim=-1)
+            # input_ids = torch.cat([input_ids, next_tokens[:, None]], dim=-1)
 
             # update which sequences are finished
             unfinished_sequences = unfinished_sequences.mul(
@@ -176,18 +177,29 @@ class SLAM(nn.Module, PyTorchModelHubMixin):
                 break
 
             # stop if we exceed the maximum length
-            if stopping_criteria(input_ids=input_ids, scores=None):
+            if stopping_criteria(input_ids=input_ids.unsqueeze(0), scores=None):
+            # if stopping_criteria(input_ids=input_ids, scores=None):
                 break
 
-            new_inputs_embedding: Tensor = self.decoder.model.get_input_embeddings()(next_tokens)
+            # new_inputs_embedding: Tensor = self.decoder.model.get_input_embeddings()(next_tokens)
+            decoder_input.instruct += self.decoder.tokenizer.decode(next_tokens)
+            print(decoder_input.instruct)
 
-            inputs_embedding.inputs_embeds = torch.cat(
-                (
-                    inputs_embedding.inputs_embeds,
-                    new_inputs_embedding.unsqueeze(1),
-                ),
-                dim=1,
-            )
+            # inputs_embedding.inputs_embeds = torch.cat(
+            #     (
+            #         inputs_embedding.inputs_embeds,
+            #         new_inputs_embedding.unsqueeze(1),
+            #     ),
+            #     dim=1,
+            # )
+
+            # inputs_embedding.inputs_embeds = torch.cat(
+            #     (
+            #         inputs_embedding.inputs_embeds,
+            #         new_inputs_embedding.unsqueeze(1),
+            #     ),
+            #     dim=1,
+            # )
 
         if len(raw_speech.shape) == 1:
             input_ids = input_ids[0]
