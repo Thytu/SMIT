@@ -1,0 +1,52 @@
+model:
+
+  encoder:
+    model_name: "facebook/hubert-large-ls960-ft"
+    sampling_rate: 16_000
+
+  decoder:
+    model_name: "abacaj/phi-2-super"
+    audio_placeholder: null # uses default one
+    prompt_template: null # uses default one
+
+# TODO: handle diverse dataset
+# NOTE: unused at this tim
+# TODO: handle filtering
+# handle: shuffling
+datasets:
+  librispeech:
+    audio_key: audio # TODO: use this value to pre-process it according to encoder SR
+    instruct: "Transcribe speech to text {audio}" # add/overwrite instruct value in dataset
+    subset: all
+    train_split: train.other.500
+    test_split: test.other
+    validation_split: validation.other
+
+  WizardLM/WizardLM_evol_instruct_70k:
+    train_split: train[:50000]
+    test_split: train[50000:60000]
+    validation_split: train[60000:]
+
+training:
+  early_stopping_patience: 9
+  resume_from_checkpoint: null
+
+training_args:
+  output_dir: "/scratch/SLAM-ASR-outputs/model/"
+  # group_by_length=True, # Makes the training init super long (~2h)
+  bf16: True
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 2
+  per_device_eval_batch_size: 16
+  evaluation_strategy: "steps"
+  eval_steps: 1000
+  save_steps: 1000
+  logging_steps: 100
+  learning_rate: 1e-4
+  max_steps: 100_000
+  warmup_steps: 1_000
+  save_total_limit: 10
+  dataloader_num_workers: 16
+  report_to: "wandb"
+  weight_decay: 0
+  load_best_model_at_end: True
