@@ -130,6 +130,8 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 - [X] data-preprocessing must capitalize the text properly (not all cap)
 - [X] Export processed dataset locally to be loaded at training time
 - [ ] Reduce number of samples for continous training
+- [ ] Link hydra to data_handler
+- [ ] Support other datasets
 - [ ] Create audio instruct dataset
 
 ### Training
@@ -137,8 +139,10 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 - [X] Overfeat the model on a subset of librispeech
 - [X] Train the model on the full set of librispeech
 - [X] Fix why the model doesn't procudes EOS (or issue on inference fn?)
-- [ ] Pre-training on projector
 - [X] Padding should be set to max(len_of_inputs) instead of always 2048
+- [ ] Pre-training on projector
+- [ ] Support other LLM
+- [ ] Support other speech encoder
 
 ### Evaluation
 - [X] Evaluate on librispeech
