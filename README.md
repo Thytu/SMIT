@@ -107,24 +107,34 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 ## TODO List
 
 ### Model
-- [ ] `SLAM` must accepts a batched tensor as input (currently expects a list representing a single audio sample)
+- [X] `SLAM` must accepts a batched tensor as input (currently expects a list representing a single audio sample)
 - [ ] `SLAM.encoder` should not have to use the fined-tunable version of `hubert-large-ls960`
-- [ ] `SLAM.generate_transcript` method must be autoregressive and fully transcribe the input audio
+- [X] `SLAM.generate_transcript` method must be autoregressive and fully transcribe the input audio
 
 ### Data
-- [ ] Write the data-preprocessing functions
-- [ ] data-preprocessing must capitalize the text properly (not all cap)
-- [ ] Export processed dataset locally to be loaded at training time
+- [X] Write the data-preprocessing functions
+- [X] data-preprocessing must capitalize the text properly (not all cap)
+- [X] Export processed dataset locally to be loaded at training time
+- [ ] Reduce number of samples for continous training
+- [ ] Create audio instruct dataset
 
 ### Training
-- [ ] Write the training functions
-- [ ] Overfeat the model on a subset of librispeech
+- [X] Write the training functions
+- [X] Overfeat the model on a subset of librispeech
+- [X] Train the model on the full set of librispeech
+- [X] Fix why the model doesn't procudes EOS (or issue on inference fn?)
+- [ ] Pre-training on projector
+- [X] Padding should be set to max(len_of_inputs) instead of always 2048
+
+### Evaluation
+- [X] Evaluate on librispeech
+- [ ] Check if it impacts phi2 results on OpenLLM-Leaderboard
 
 ### Distribution
-- [ ] Write a DVC pipe to easily reproduce results
+- [ ] Use [hydra-zen](https://mit-ll-responsible-ai.github.io/hydra-zen/) to create a user CLI
 - [ ] Write a proper README
 - [ ] Write a "How to use the model" doc with everything required for inference (i.e using feature_extractor)
-- [ ] Upload model to Hugging-Face
+- [X] Upload model to Hugging-Face
 - [ ] Create a Hugging-Face Space for the model
 - [ ] Record a Video reproducing the projects
 - [ ] Share over HF's discord in i-made-this channel
