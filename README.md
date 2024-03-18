@@ -146,8 +146,10 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 
 ### Distribution
 - [ ] Use [hydra-zen](https://mit-ll-responsible-ai.github.io/hydra-zen/) to create a user CLI
+- [ ] Reduce RAM and VRAM usage
 - [ ] Write a proper README
 - [ ] Write a "How to use the model" doc with everything required for inference (i.e using feature_extractor)
+- [ ] Wrape in docker
 - [X] Upload model to Hugging-Face
 - [ ] Create a Hugging-Face Space for the model
 - [ ] Record a Video reproducing the projects
