@@ -1,11 +1,12 @@
 import wandb
-import functools
+import hydra
 import numpy as np
 
 from SLAM import SLAM
 from typing import Dict
 from datasets import load_from_disk
 from evaluate import load as load_metric
+from omegaconf import DictConfig
 from DataCollator import DataCollator
 from transformers import (
     Trainer,
@@ -26,7 +27,6 @@ def compute_metrics(pred, processor: Wav2Vec2Processor) -> Dict[str, float]:
 
     pred_str = processor.batch_decode(pred_ids)
 
-    # we do not want to group tokens when computing the metrics
     label_str = processor.batch_decode(pred.label_ids, group_tokens=False)
 
     wer: float = wer_metric.compute(predictions=pred_str, references=label_str)
@@ -34,13 +34,10 @@ def compute_metrics(pred, processor: Wav2Vec2Processor) -> Dict[str, float]:
     return {"wer": wer}
 
 
-def main():
+@hydra.main(version_base=None, config_path="../conf", config_name="default")
+def main(cfg : DictConfig):
 
-    model = SLAM(decode_name="abacaj/phi-2-super")
-
-    for name, param in model.named_parameters():
-        if not any([linear_indicator in name for linear_indicator in ('fc', 'dense', 'linear')]):
-            param.requires_grad = False
+    model = SLAM(**cfg.model)
 
     processor = Wav2Vec2Processor(
         feature_extractor=model.encoder.feature_extractor,
@@ -51,7 +48,7 @@ def main():
         processor=processor,
         padding_inputs=True,
         padding_labels='max_length',
-        max_length_labels=512,
+        max_length_labels=model.decoder.tokenizer.model_max_length,
     )
 
     dataset = load_from_disk("outputs/dataset/")
@@ -60,26 +57,11 @@ def main():
     test_set = dataset['test']
     validation_set = dataset['validation']
 
-    training_args = TrainingArguments(
-        output_dir="/scratch/SLAM-ASR-outputs/model/",
-        # group_by_length=True, # Makes the training init suepr long (~2h)
-        bf16=True,
-        per_device_train_batch_size=2,
-        gradient_accumulation_steps=2,
-        per_device_eval_batch_size=16,
-        evaluation_strategy="steps",
-        eval_steps=1000,
-        save_steps=1000,
-        logging_steps=100,
-        learning_rate=1e-4,
-        max_steps=100_000,
-        warmup_steps=1_000,
-        save_total_limit=15,
-        dataloader_num_workers=16,
-        report_to="wandb",
-        weight_decay=0,
-        load_best_model_at_end=True,
-    )
+    training_args = TrainingArguments(**cfg.training_args)
+
+    callbacks = []
+    if (early_stopping_patience := cfg.training.early_stopping_patience) is not None:
+        callbacks.append(EarlyStoppingCallback(early_stopping_patience=early_stopping_patience))
 
     trainer = Trainer(
         model=model,
@@ -89,12 +71,11 @@ def main():
         train_dataset=train_set,
         eval_dataset=test_set,
         tokenizer=processor.feature_extractor,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=14)],
+        callbacks=callbacks,
     )
 
     with wandb.init(project="SLAM-ASR") as run:
-        trainer.train()
-        # trainer.train(resume_from_checkpoint="/scratch/SLAM-ASR-outputs/model/checkpoint-7000/")
+        trainer.train(resume_from_checkpoint=cfg.training.resume_from_checkpoint)
         trainer.evaluate(
             eval_dataset=validation_set,
             metric_key_prefix="validation"
