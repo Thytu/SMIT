@@ -12,20 +12,43 @@ model:
 # TODO: handle diverse dataset
 # NOTE: unused at this tim
 # TODO: handle filtering
-# handle: shuffling
 datasets:
-  librispeech:
-    audio_key: audio # TODO: use this value to pre-process it according to encoder SR
+
+  librispeech_asr:
+    audio_column: audio # TODO: use this value to pre-process it according to encoder SR
+    label_column: text # TODO: use this value to pre-process it according to encoder SR
+    instruct_column: text # TODO: use this value to pre-process it according to encoder SR
     instruct: "Transcribe speech to text {audio}" # add/overwrite instruct value in dataset
     subset: all
-    train_split: train.other.500
-    test_split: test.other
-    validation_split: validation.other
+
+    splits:
+      train: train.other.500[:50000]
+      test: test.other
+      validation: validation.other
+
+    filters:
+      is_shorter_than_model_max_length:
+        columns: ["labels", "inputs.instruct"]
+        safe_padding: 30
 
   WizardLM/WizardLM_evol_instruct_70k:
-    train_split: train[:50000]
-    test_split: train[50000:60000]
-    validation_split: train[60000:]
+    instruct_column: instruction # TODO: use this value to pre-process it according to encoder SR
+
+    label_column: output # TODO: use this value to pre-process it according to encoder SR
+
+    splits:
+      train: train[:50000]
+      test: train[50000:60000]
+      validation: train[60000:]
+
+    filters:
+      is_shorter_than_model_max_length:
+        columns: ["labels", "inputs.instruct"]
+        safe_padding: 30
+
+      is_longer_than:
+        columns: ["labels", "inputs.instruct"]
+        value: 0
 
 training:
   early_stopping_patience: 9
