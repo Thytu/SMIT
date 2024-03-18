@@ -110,8 +110,6 @@ class Decoder(nn.Module):
 
         # TODO: change 2048 to model's max len
         labels = None
-        # max_length = 2048 if len(inputs) > 1 else None
-        max_length = 2048# if len(inputs) > 1 else None
         inputs_embeddings = []
         pad_embedding: Tensor = self.model.get_input_embeddings()(torch.tensor(self.tokenizer.pad_token_id, device=device_to_use))
 
@@ -137,17 +135,17 @@ class Decoder(nn.Module):
                 _input.instruct = self.instruct_template.format(instruct=_input.instruct)
 
             if "{audio}" in _input.instruct:
-                embbeding = self._generate_embedding_with_audio(
+                embedding = self._generate_embedding_with_audio(
                     prompt=_input.instruct,
                     # input_ids=_input.instruct_ids,
                     audio_embedding=_input.audio_embedding,
                     device_to_use=device_to_use,
                 )
             else:
-                embbeding = self._generate_embedding_without_audio(prompt=_input.instruct, device_to_use=device_to_use)
+                embedding = self._generate_embedding_without_audio(prompt=_input.instruct, device_to_use=device_to_use)
 
-            if max_length is not None and embbeding.size(0) > max_length:
-                raise RuntimeError(f"Received an input that its embedding is larger than {max_length=}.")
+            if self.tokenizer.model_max_length is not None and embedding.size(0) > self.tokenizer.model_max_length:
+                raise RuntimeError(f"Received an input that its embedding is larger than {self.tokenizer.model_max_length=}.")
 
             if _input.labels is not None:
 
@@ -168,7 +166,7 @@ class Decoder(nn.Module):
                 _labels = torch.cat(
                     (
                         torch.full(
-                            size=[embbeding.size(0)],
+                            size=[embedding.size(0)],
                             fill_value=-100,
                             device=device_to_use,
                         ),
@@ -177,9 +175,9 @@ class Decoder(nn.Module):
                     dim=-1
                 )
 
-                embbeding = torch.cat(
+                embedding = torch.cat(
                     (
-                        embbeding,
+                        embedding,
                         labels_embeddings,
                     ),
                     dim=0,
@@ -187,33 +185,28 @@ class Decoder(nn.Module):
 
                 labels.append(_labels)
 
-            if max_length is not None:
-                embbeding = torch.cat((
-                    embbeding,
-                    pad_embedding.repeat([max_length - embbeding.size(0), 1]),
-                ))
+            inputs_embeddings.append(embedding)
 
-            inputs_embeddings.append(embbeding)
+        max_length = max([embedding.size(0) for embedding in inputs_embeddings])
 
-        inputs_embeddings: Tensor = torch.stack(inputs_embeddings)
+        inputs_embeddings: Tensor = torch.stack([torch.cat((
+            embedding,
+            pad_embedding.repeat([max_length - embedding.size(0), 1]),
+        )) for embedding in inputs_embeddings])
 
         if labels is not None:
 
-            label_max_length = max_length
-            # label_max_length = max([len(_label) for _label in labels])
+            # Fills with -100 has we do not calculate loss on pad tokens
             labels = [torch.cat([
                 _label,
                 torch.full(
-                    [label_max_length - _label.size(0)],
+                    [max_length - _label.size(0)],
                     fill_value=-100,
                     device=device_to_use
                 ),
             ]) for _label in labels]
 
             labels = torch.stack(labels)
-
-            # We do not calculate loss on pad tokens
-            labels[labels == self.tokenizer.pad_token_id] = -100
 
         return self.model(inputs_embeds=inputs_embeddings, labels=labels)
 
@@ -222,7 +215,6 @@ if __name__ == "__main__":
     import torch
 
     device_to_use = "cpu"
-    # device_to_use = "cuda:0" if torch.cuda.is_available() else "cpu"
 
     dummy_input = torch.randn([8, 200, 2560], device=device_to_use)
 
