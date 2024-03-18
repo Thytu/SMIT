@@ -108,28 +108,23 @@ class SLAM(nn.Module):
 
         return self.decoder(inputs)
 
+    # TODO: handle batch as input
     # TODO: change default max_length to decoder's max_length
-    # TODO: change function to generic .generate one but it must handles audio as input
-    def generate_transcript(self, raw_speech: Tensor, max_length: int = 512) -> Tensor:
+    def generate_transcript(self, raw_speech: Union[Tensor, List[Tensor]], max_length: int = 512) -> Tensor:
         self._init_processor()
 
         encoder_input = raw_speech
 
         # create batch size of one if a single sample is provided
-        # if len(encoder_input.shape) == 1:
-        #     encoder_input = encoder_input.unsqueeze(0)
+        if isinstance(encoder_input, Tensor) and len(encoder_input.shape) == 1:
+            encoder_input = encoder_input.unsqueeze(0)
 
         device_to_use = next(self.parameters()).device
 
-        print(f"{encoder_input.shape}")
-
-        speech_embeddings = self._encode_audio(encoder_input)
-
-        decoder_input = DecoderInput(
-            instruct="Transcribe speech to text {audio}",
-            audio_embedding=speech_embeddings,
-        )
-        # inputs_embedding = self.decoder._generate_inputs_embeds(speech_embeddings)
+        decoder_inputs = [DecoderInput(
+            instruct=self.decoder.instruct_template.format(instruct="Transcribe speech to text {audio}"),
+            audio_embedding=self._encode_audio(_encoder_input),
+        ) for _encoder_input in encoder_input]
 
         # used to normalize the logits (useful for beam search)
         logits_processor = LogitsProcessorList([LogitNormalization()])
@@ -138,19 +133,15 @@ class SLAM(nn.Module):
         stopping_criteria = StoppingCriteriaList([MaxLengthCriteria(max_length=max_length)])
 
         # keep track of which sequences are already finished
-        unfinished_sequences = torch.ones(encoder_input.shape[0], dtype=torch.long, device=device_to_use)
+        unfinished_sequences = torch.ones(len(encoder_input), dtype=torch.long, device=device_to_use)
 
         eos_token_id_tensor = torch.tensor([self.decoder.tokenizer.eos_token_id], device=device_to_use)
 
-        input_ids = torch.empty((0), dtype=torch.long, device=device_to_use)
-        # input_ids = torch.empty((encoder_input.size(0), 0), dtype=torch.long, device=device_to_use)
-
-        decoder_input.instruct = self.decoder.instruct_template.format(instruct=decoder_input.instruct)
+        input_ids = torch.empty((len(encoder_input), 0), dtype=torch.long, device=device_to_use)
 
         while True:
 
-            # FIXME: shouldn't pad if only one value
-            outputs: CausalLMOutputWithPast = self.decoder(decoder_input, apply_prompt_formating=False)
+            outputs: CausalLMOutputWithPast = self.decoder(decoder_inputs, apply_prompt_formating=False)
 
             next_token_logits = outputs.logits[0, -1, :]
 
@@ -159,13 +150,10 @@ class SLAM(nn.Module):
             next_tokens = torch.argmax(next_tokens_scores, dim=-1)
 
             # finished sentences should have their next token be a padding token
-            # next_tokens = next_tokens * unfinished_sequences + self.decoder.tokenizer.pad_token_id * (1 - unfinished_sequences)
+            next_tokens = next_tokens * unfinished_sequences + self.decoder.tokenizer.pad_token_id * (1 - unfinished_sequences)
 
             # update generated ids, model inputs, and length for next step
-            # print(f'{next_tokens[:, None].shape=}')
-            # print(f'{next_tokens.shape=}')
-            input_ids = torch.cat([input_ids, torch.tensor([next_tokens], device=input_ids.device)], dim=-1)
-            # input_ids = torch.cat([input_ids, next_tokens[:, None]], dim=-1)
+            input_ids = torch.cat([input_ids, next_tokens[:, None]], dim=-1)
 
             # update which sequences are finished
             unfinished_sequences = unfinished_sequences.mul(
@@ -177,32 +165,13 @@ class SLAM(nn.Module):
                 break
 
             # stop if we exceed the maximum length
-            if stopping_criteria(input_ids=input_ids.unsqueeze(0), scores=None):
-            # if stopping_criteria(input_ids=input_ids, scores=None):
+            if all(stopping_criteria(input_ids=input_ids, scores=None).cpu().detach().tolist()):
                 break
 
-            # new_inputs_embedding: Tensor = self.decoder.model.get_input_embeddings()(next_tokens)
-            decoder_input.instruct += self.decoder.tokenizer.decode(next_tokens)
-            print(decoder_input.instruct)
-
-            # inputs_embedding.inputs_embeds = torch.cat(
-            #     (
-            #         inputs_embedding.inputs_embeds,
-            #         new_inputs_embedding.unsqueeze(1),
-            #     ),
-            #     dim=1,
-            # )
-
-            # inputs_embedding.inputs_embeds = torch.cat(
-            #     (
-            #         inputs_embedding.inputs_embeds,
-            #         new_inputs_embedding.unsqueeze(1),
-            #     ),
-            #     dim=1,
-            # )
-
-        if len(raw_speech.shape) == 1:
-            input_ids = input_ids[0]
+            decoder_inputs = [DecoderInput(
+                instruct=_decoder_inputs.instruct + self.decoder.tokenizer.decode(_next_tokens),
+                audio_embedding=_decoder_inputs.audio_embedding,
+            ) for (_decoder_inputs, _next_tokens) in zip(decoder_inputs, next_tokens)]
 
         return input_ids
 
@@ -214,19 +183,9 @@ if __name__ == "__main__":
 
     model = SLAM(decode_name="abacaj/phi-2-super").eval().to(device_to_use)
 
-    # dummy_input_values = torch.randn((2, 258560), device=device_to_use)
-
     dummy_input_values = SLAMInput(
         instruct=(f"{model.decoder.tokenizer.eos_token}[INST]" " Transcribe speech to text {audio} [/INST]"),
         raw_audio=torch.randn((258560), device=device_to_use),
     )
 
     model.forward(dummy_input_values)
-
-    # FIXME
-    # input_ids = model.generate_transcript(dummy_input_values)
-
-    # print(f"{input_ids.shape=}")
-
-    # for _input_ids in input_ids:
-    #     print("[TRANSCRIPTION]\n-----\n", model.decoder.tokenizer.decode(_input_ids), end="\n-----\n\n")
