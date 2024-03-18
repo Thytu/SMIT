@@ -104,18 +104,18 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/Thytu/SLAM-ASR.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/Thytu/SLAM-ASR.svg?style=for-the-badge&color=blue
 [contributors-url]: https://github.com/Thytu/SLAM/graphs/contributors
 [pr-shield]: https://img.shields.io/github/issues-pr/Thytu/SLAM-ASR.svg?style=for-the-badge
 [pr-url]: https://github.com/Thytu/SLAM/pulls
 [issues]: https://img.shields.io/github/issues/Thytu/SLAM-ASR
-[forks-shield]: https://img.shields.io/github/forks/Thytu/SLAM-ASR.svg?style=for-the-badge&
+[forks-shield]: https://img.shields.io/github/forks/Thytu/SLAM-ASR.svg?style=for-the-badge&color=blue
 [forks-url]: https://github.com/Thytu/SLAM/network/members
-[stars-shield]: https://img.shields.io/github/stars/Thytu/SLAM-ASR.svg?style=for-the-badge&
+[stars-shield]: https://img.shields.io/github/stars/Thytu/SLAM-ASR.svg?style=for-the-badge&color=yellow
 [stars-url]: https://github.com/Thytu/SLAM/stargazers
 [issues-shield]: https://img.shields.io/github/issues/Thytu/SLAM-ASR.svg?style=for-the-badge&
 [issues-url]: https://github.com/Thytu/SLAM/issues
-[license-shield]: https://img.shields.io/github/license/Thytu/SLAM-ASR.svg?style=for-the-badge&
+[license-shield]: https://img.shields.io/github/license/Thytu/SLAM-ASR.svg?style=for-the-badge&color=indigo
 [license-url]: https://github.com/Thytu/SLAM/blob/master/LICENSE
 
 ## TODO List
