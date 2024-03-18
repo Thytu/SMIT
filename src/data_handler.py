@@ -18,24 +18,24 @@ def load_processed_librispeech_dataset(
 
     COLUMNS_TO_DROP = ["file", "speaker_id", "chapter_id", "id"]
 
-    common_voice_train = load_dataset(LIBRISPEECH_ASR, "all", split="train.other.500" + (train_split_size if train_split_size is not None else ""))
-    common_voice_test = load_dataset(LIBRISPEECH_ASR, "all", split="test.other" + (test_split_size if test_split_size is not None else ""))
-    common_voice_validation = load_dataset(LIBRISPEECH_ASR, "all", split="test.other" + (validation_split_size if validation_split_size is not None else ""))
+    librispeech_train = load_dataset(LIBRISPEECH_ASR, "all", split="train.other.500" + (train_split_size if train_split_size is not None else ""))
+    librispeech_test = load_dataset(LIBRISPEECH_ASR, "all", split="test.other" + (test_split_size if test_split_size is not None else ""))
+    librispeech_validation = load_dataset(LIBRISPEECH_ASR, "all", split="validation.other" + (validation_split_size if validation_split_size is not None else ""))
 
     # TODO: I don't think I need to do that as I can directly use sample["audio"]["array"]
-    common_voice_train = common_voice_train.remove_columns(COLUMNS_TO_DROP)
-    common_voice_train = common_voice_train.cast_column("audio", Audio(sampling_rate=SAMPLING_RATE))
+    librispeech_train = librispeech_train.remove_columns(COLUMNS_TO_DROP)
+    librispeech_train = librispeech_train.cast_column("audio", Audio(sampling_rate=SAMPLING_RATE))
 
-    common_voice_test = common_voice_test.remove_columns(COLUMNS_TO_DROP)
-    common_voice_test = common_voice_test.cast_column("audio", Audio(sampling_rate=SAMPLING_RATE))
+    librispeech_test = librispeech_test.remove_columns(COLUMNS_TO_DROP)
+    librispeech_test = librispeech_test.cast_column("audio", Audio(sampling_rate=SAMPLING_RATE))
 
-    common_voice_validation = common_voice_validation.remove_columns(COLUMNS_TO_DROP)
-    common_voice_validation = common_voice_validation.cast_column("audio", Audio(sampling_rate=SAMPLING_RATE))
+    librispeech_validation = librispeech_validation.remove_columns(COLUMNS_TO_DROP)
+    librispeech_validation = librispeech_validation.cast_column("audio", Audio(sampling_rate=SAMPLING_RATE))
 
     return {
-        "train": common_voice_train.shuffle(),
-        "test": common_voice_test.shuffle(),
-        "validation": common_voice_validation.shuffle(),
+        "train": librispeech_train.shuffle(),
+        "test": librispeech_test.shuffle(),
+        "validation": librispeech_validation.shuffle(),
     }
 
 
