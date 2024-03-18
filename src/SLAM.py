@@ -147,6 +147,8 @@ class SLAM(nn.Module):
 
     # TODO: handle batch as input
     # TODO: change default max_length to decoder's max_length
+    # TODO: replace by a SLAM.generate that supports {audio} key word
+    # ie. generate(prompt="Transcribe speech to text {audio}", raw_speech)
     def generate_transcript(self, raw_speech: Union[Tensor, List[Tensor]], max_length: int = 512) -> Tensor:
         self._init_processor()
 
