@@ -40,6 +40,7 @@ class SLAM(nn.Module):
 
         super().__init__(*args, **kwargs)
 
+        self._train_projector_only = False
 
         self.encoder = Encoder(**encoder_args)
 
@@ -65,7 +66,17 @@ class SLAM(nn.Module):
     def help(cls):
         print("TODO: help message")
 
-    def train(self, mode: bool = True):
+    def _projector_only_trainmode(self, mode: bool = True):
+        super().train(mode)
+
+        # Only linear_projector
+        self.encoder.eval()
+        self.decoder.eval()
+
+        return self
+
+
+    def _projector_n_decoder_trainmode(self, mode: bool = True):
         super().train(mode)
 
         # Only train decoder and linear_projector
@@ -77,6 +88,14 @@ class SLAM(nn.Module):
                 param.requires_grad = False
 
         return self
+
+    def train(self, mode: bool = True):
+        super().train(mode)
+
+        if self._train_projector_only is True:
+            return self._projector_only_trainmode()
+
+        return self._projector_n_decoder_trainmode()
 
     def eval(self):
         return super().eval()
