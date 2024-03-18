@@ -9,7 +9,6 @@ from Decoder import Decoder, DecoderInput
 from transformers import Wav2Vec2Processor
 from LinearProjector import LinearProjector
 from FramesDownSampler import FramesDownSampler
-from huggingface_hub import PyTorchModelHubMixin
 from transformers.modeling_outputs import CausalLMOutputWithPast
 from transformers.generation import (
     LogitNormalization,
@@ -24,20 +23,35 @@ class SLAMInput(OrderedDict):
     instruct: str = None
     instruct_ids: Optional[Union[List[int], Tensor]] = None
     raw_audio: Optional[Tensor] = None
-    # labels: Optional[str] = None
 
 
 class SLAM(nn.Module):
-    def __init__(self, decode_name: str, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
+
+        if "encoder" not in kwargs:
+            raise ValueError("SLAM expects to receive a dict named 'encoder' as input. See SLAM.help()")
+
+        encoder_args = kwargs.pop("encoder")
+
+        if "decoder" not in kwargs:
+            raise ValueError("SLAM expects to receive a dict named 'decoder' as input. See SLAM.help()")
+
+        decoder_args = kwargs.pop("decoder")
+
         super().__init__(*args, **kwargs)
 
-        self.encoder = Encoder(sampling_rate=16_000)
+
+        self.encoder = Encoder(**encoder_args)
+
         self.down_sampler = FramesDownSampler(k=5)
-        self.decoder = Decoder(model_name=decode_name, **kwargs)
+
+        self.decoder = Decoder(**decoder_args)
+
         self.linear_projector = LinearProjector(
             input_dim=self.encoder.output_dim,
             output_dim=self.decoder.model.config.hidden_size,
         )
+
         self.processor = None
 
     def _init_processor(self):
@@ -46,6 +60,10 @@ class SLAM(nn.Module):
                 feature_extractor=self.encoder.feature_extractor,
                 tokenizer=self.decoder.tokenizer,
             )
+
+    @classmethod
+    def help(cls):
+        print("TODO: help message")
 
     def train(self, mode: bool = True):
         super().train(mode)
@@ -86,7 +104,7 @@ class SLAM(nn.Module):
 
         for idx, _input in enumerate(inputs):
 
-            if isinstance(_input, dict):
+            if isinstance(_input, dict) and not isinstance(_input, SLAMInput):
                 inputs[idx] = SLAMInput(
                     instruct=_input.get("instruct"),
                     instruct_ids=_input.get("instruct_ids"),
@@ -181,7 +199,15 @@ if __name__ == "__main__":
 
     device_to_use = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    model = SLAM(decode_name="abacaj/phi-2-super").eval().to(device_to_use)
+    model = SLAM(
+        decoder={
+            "model_name": "abacaj/phi-2-super"
+        },
+        encoder={
+            "model_name": "facebook/hubert-large-ls960-ft",
+            "sampling_rate": 16_000,
+        }
+    ).eval().to(device_to_use)
 
     dummy_input_values = SLAMInput(
         instruct=(f"{model.decoder.tokenizer.eos_token}[INST]" " Transcribe speech to text {audio} [/INST]"),
