@@ -10,22 +10,22 @@
 
 <br />
 <div align="center">
-  <a href="https://github.com/Thytu/SLAM-ASR">
+  <a href="https://github.com/Thytu/SLAM">
     <img src="https://i.ibb.co/CvLbGX6/SLAM-ASR-logo-v2.png" alt="Logo" width="200" height="200">
   </a>
 
-  <h3 align="center" style="font-size: 200%">SLAM-ASR</h3>
+  <h3 align="center" style="font-size: 200%">SLAM</h3>
 
   <p align="center">
     <b> Bringing audio to LLM </b>
     <br />
     <br />
-    <a href="#usage"><strong>Explore the docs »</strong></a>
+    <a href="#getting-started"><strong>Explore the docs</strong></a>
     <br />
     <br />
     <a href="#about-the-project">View Demo</a>
-    · <a href="https://github.com/Thytu/SLAM-ASR/issues">Report Bug</a>
-    · <a href="https://github.com/Thytu/SLAM-ASR/issues">Request Feature</a>
+    · <a href="#about-the-project">More about SLAM</a>
+    · <a href="https://github.com/Thytu/SLAM/issues">Report Bug / Request Feature</a>
   </p>
 </div>
 
@@ -105,18 +105,18 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [contributors-shield]: https://img.shields.io/github/contributors/Thytu/SLAM-ASR.svg?style=for-the-badge
-[contributors-url]: https://github.com/Thytu/SLAM-ASR/graphs/contributors
+[contributors-url]: https://github.com/Thytu/SLAM/graphs/contributors
 [pr-shield]: https://img.shields.io/github/issues-pr/Thytu/SLAM-ASR.svg?style=for-the-badge
-[pr-url]: https://github.com/Thytu/SLAM-ASR/pulls
+[pr-url]: https://github.com/Thytu/SLAM/pulls
 [issues]: https://img.shields.io/github/issues/Thytu/SLAM-ASR
 [forks-shield]: https://img.shields.io/github/forks/Thytu/SLAM-ASR.svg?style=for-the-badge&
-[forks-url]: https://github.com/Thytu/SLAM-ASR/network/members
+[forks-url]: https://github.com/Thytu/SLAM/network/members
 [stars-shield]: https://img.shields.io/github/stars/Thytu/SLAM-ASR.svg?style=for-the-badge&
-[stars-url]: https://github.com/Thytu/SLAM-ASR/stargazers
+[stars-url]: https://github.com/Thytu/SLAM/stargazers
 [issues-shield]: https://img.shields.io/github/issues/Thytu/SLAM-ASR.svg?style=for-the-badge&
-[issues-url]: https://github.com/Thytu/SLAM-ASR/issues
+[issues-url]: https://github.com/Thytu/SLAM/issues
 [license-shield]: https://img.shields.io/github/license/Thytu/SLAM-ASR.svg?style=for-the-badge&
-[license-url]: https://github.com/Thytu/SLAM-ASR/blob/master/LICENSE
+[license-url]: https://github.com/Thytu/SLAM/blob/master/LICENSE
 
 ## TODO List
 
