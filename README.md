@@ -17,7 +17,8 @@
   <h3 align="center" style="font-size: 200%">SLAM-ASR</h3>
 
   <p align="center">
-    <b> Bringing audio to LLM: A fine-tuned LLM for ASR</b>
+    <b> Bringing audio to LLM/b>
+    <br />
     <br />
     <a href="#usage"><strong>Explore the docs »</strong></a>
     <br />
@@ -76,7 +77,7 @@ Don't forget to give the project a star! 🌟 Thanks again!
 
 ## Acknowledgments
 
-TODO: Cite Alibaba's paper
+This project draws significant inspiration from the [An Embarrassingly Simple Approach for LLM with Strong ASR Capacity](https://arxiv.org/pdf/2402.08846.pdf) paper. I thank the authors for sharing their expertise. Huge thanks to the CoolKids for their  help in debugging some pesky issues I ran into. And last but definitely not the least, a massive thank you to Oursin – this project simply wouldn't exist without you!
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
