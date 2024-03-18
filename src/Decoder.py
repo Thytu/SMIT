@@ -18,7 +18,14 @@ class DecoderInput(OrderedDict):
 
 
 class Decoder(nn.Module):
-    def __init__(self, model_name: str, prompt_template: Optional[str] = None, *args, **kwargs) -> None:
+    def __init__(
+            self,
+            model_name: str,
+            audio_placeholder: Optional[str] = None,
+            prompt_template: Optional[str] = None,
+            *args, **kwargs
+    ) -> None:
+
         super().__init__(*args, **kwargs)
 
         self.logger = getLogger(__name__)
@@ -28,9 +35,8 @@ class Decoder(nn.Module):
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
 
-        self.audio_placeholder: str = "{audio}"
+        self.audio_placeholder: str = audio_placeholder if audio_placeholder is not None else "{audio}"
 
-        # TODO: bench w/ VS w/o starting w/ EOS token
         # TODO: provide guielines on how to provide a prompt template + check that the prompt template is valid
         default_prompt_template = (f"{self.tokenizer.eos_token}[INST]" " {instruct} [/INST]")
         self.instruct_template = prompt_template if prompt_template is not None else default_prompt_template
@@ -95,7 +101,7 @@ class Decoder(nn.Module):
         if isinstance(inputs, DecoderInput):
             inputs = [inputs]
 
-        # casting DecoderInput.instruct_ids
+        # casting to DecoderInput.instruct_ids
         for _input in inputs:
 
             if _input.instruct is None and _input.instruct_ids is None:
@@ -105,10 +111,6 @@ class Decoder(nn.Module):
                 _input.instruct = self.tokenizer.decode(_input.instruct_ids)
                 _input.instruct_ids = None
 
-            # if isinstance(_input.instruct_ids, list):
-            #     _input.instruct_ids = torch.tensor(_input.instruct_ids, device=device_to_use)
-
-        # TODO: change 2048 to model's max len
         labels = None
         inputs_embeddings = []
         pad_embedding: Tensor = self.model.get_input_embeddings()(torch.tensor(self.tokenizer.pad_token_id, device=device_to_use))
@@ -119,14 +121,14 @@ class Decoder(nn.Module):
 
             labels = []
 
-        for i, _input in enumerate(inputs):
+        for _input in inputs:
 
-            if "{audio}" in _input.instruct and _input.audio_embedding is None:
-                raise RuntimeError("Received a prompt with the '{audio}' key but with DecoderInput.audio_embedding being None")
+            if self.audio_placeholder in _input.instruct and _input.audio_embedding is None:
+                raise RuntimeError(f"Received a prompt with the '{self.audio_placeholder}' key but with DecoderInput.audio_embedding being None")
 
-            if "{audio}" not in _input.instruct and _input.audio_embedding is not None:
+            if self.audio_placeholder not in _input.instruct and _input.audio_embedding is not None:
                 self.logger.warning((
-                    "Received a prompt without an '{audio}' key but DecoderInput.audio_embedding being not None. "
+                    f"Received a prompt without an '{self.audio_placeholder}' key but DecoderInput.audio_embedding being not None. "
                     "DecoderInput.audio_embedding will be ignored."
                 ))
 
@@ -134,10 +136,9 @@ class Decoder(nn.Module):
             if apply_prompt_formating:
                 _input.instruct = self.instruct_template.format(instruct=_input.instruct)
 
-            if "{audio}" in _input.instruct:
+            if self.audio_placeholder in _input.instruct:
                 embedding = self._generate_embedding_with_audio(
                     prompt=_input.instruct,
-                    # input_ids=_input.instruct_ids,
                     audio_embedding=_input.audio_embedding,
                     device_to_use=device_to_use,
                 )
@@ -221,14 +222,14 @@ if __name__ == "__main__":
     decoder = Decoder(model_name="microsoft/phi-2").to(device_to_use)
 
     dummy_input = DecoderInput(
-        instruct="Transcribe speech to text {audio}",
+        instruct=f"Transcribe speech to text {decoder.audio_placeholder}",
         audio_embedding=torch.randn([100, 2560], device=device_to_use),
     )
 
     output = decoder(dummy_input)
 
     dummy_input = DecoderInput(
-        instruct_ids=decoder.tokenizer("Transcribe speech to text {audio}").input_ids,
+        instruct_ids=decoder.tokenizer(f"Transcribe speech to text {decoder.audio_placeholder}").input_ids,
         audio_embedding=torch.randn([100, 2560], device=device_to_use),
     )
 
