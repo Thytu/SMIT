@@ -49,22 +49,35 @@
 
 ## About The Project
 
-TODO: Presentation of this project
+SLAM is a tool to simplify the process of adding audio modality to your LLMs offering a seamless solution with just a single config file. Say goodbye to complex setups and hello to effortlessly enhancing your models with audio capabilities!
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 ## Getting Started
 
-TODO: Guide through requirements
+SLAM currently provides a `requirements.txt`, you're invited to use a virtualenv in order to avoid any dependency conflict.
+```sh
+git clone https://github.com/Thytu/SLAM/
+cd SLAM
+
+pip3 install -r requirements.txt
+```
+
+Once the dependencies installed you can either launch the default example or custom your own LLM by writing a [config file](TODO)  or using the [CLI](TODO).
+
+```py
+python src/training.py
+```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 ## Usage
 
-TODO: Guide on how to use the model
-TODO: Guide on how to reproduce the model
+SLAM simplifies the process of enhancing your LLM with audio capabilities, following the principles outlined in the [SLAM-ASR](https://arxiv.org/abs/2402.08846) paper. By linking a speech encoder to an decoder using a trainable linear projector adding to your LLM the audio modality. SLMA automates the integration process by making it as easy as configuring a single file.
+
+To use SLAM, simply define your desired configurations in the provided config file, it will then handle the rest, seamlessly incorporating the audio modality into your models.
 
 ## Contributing
 
@@ -141,3 +154,5 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 - [ ] Share over HF's discord in i-made-this channel
 - [ ] Write a blog post presenting the projects and its inner working
 - [ ] Present the project over twitter
+
+<p align="right">(<a href="#top">back to top</a>)</p>
