@@ -17,7 +17,7 @@
   <h3 align="center" style="font-size: 200%">SLAM-ASR</h3>
 
   <p align="center">
-    <b> Bringing audio to LLM/b>
+    <b> Bringing audio to LLM </b>
     <br />
     <br />
     <a href="#usage"><strong>Explore the docs »</strong></a>
