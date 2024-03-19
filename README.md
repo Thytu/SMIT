@@ -60,7 +60,10 @@ SMIT simplifies the process of enhancing your LLM with audio capabilities, follo
 
 To use SMIT, simply define your desired configurations in the provided config file, it will then handle the rest, seamlessly incorporating the audio modality into your models.
 
+![Untitled-2022-08-10-1416](https://github.com/Thytu/SMIT/assets/43698357/7a4843d8-d283-4d3b-ab7f-1f4ba0199e4b)
+
 <p align="right">(<a href="#top">back to top</a>)</p>
+
 
 ## Getting Started
 
