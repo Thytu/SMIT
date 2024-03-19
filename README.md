@@ -100,7 +100,7 @@ cd SMIT
 pip3 install -r requirements.txt
 ```
 
-Once the dependencies installed you can either launch the default example or custom your own LLM by writing a [config file](TODO) and providing it using [hydra](https://hydra.cc/docs/advanced/override_grammar/basic/)'s syntax :
+Once the dependencies installed you can either launch the default example or custom your own LLM by writing a [config file](docs/config-file.md) and providing it using [hydra](https://hydra.cc/docs/advanced/override_grammar/basic/)'s syntax :
 ```py
 python src/main.py model=my_config
 ```
