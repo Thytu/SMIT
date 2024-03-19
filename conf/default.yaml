@@ -1,42 +1,12 @@
-model:
-
-  encoder:
-    model_name: "facebook/hubert-large-ls960-ft"
-    sampling_rate: 16_000
-
-  decoder:
-    model_name: "abacaj/phi-2-super"
-    audio_placeholder: null # uses default one
-    prompt_template: null # uses default one
-
-    quantization_config:
-      load_in_4bit: True
-      bnb_4bit_use_double_quant: True
-      bnb_4bit_quant_type: nf4
-      bnb_4bit_compute_dtype: bfloat16
-
-    peft:
-      peft_type: LORA
-      r: 8
-      lora_alpha: 32
-      lora_dropout: 0.05
-      bias: none
-      target_modules:
-        - q_proj
-        - k_proj
-        - v_proj
-        - o_proj
-        - gate_proj
-        - up_proj
-        - down_proj
-        - lm_head
+defaults:
+  - model: example
 
 datasets:
 
   librispeech_asr:
-    audio_column: audio # TODO: use this value to pre-process it according to encoder SR
-    label_column: text # TODO: use this value to pre-process it according to encoder SR
-    instruct_column: text # TODO: use this value to pre-process it according to encoder SR
+    audio_column: audio
+    label_column: text
+    instruct_column: text
     instruct: "Transcribe speech to text {audio}" # add/overwrite instruct value in dataset
     subset: all
 
@@ -56,9 +26,9 @@ datasets:
     label_column: output # TODO: use this value to pre-process it according to encoder SR
 
     splits:
-      train: train[:50000]
-      test: train[50000:60000]
-      validation: train[60000:]
+      train: train[:25000]
+      test: train[25000:37500]
+      validation: train[37500:45000]
 
     filters:
       is_shorter_than_model_max_length:
@@ -85,8 +55,7 @@ pretraining:
     save_steps: 1500
     logging_steps: 100
     learning_rate: 1e-4
-    max_steps: 100
-    # max_steps: 50_000
+    max_steps: 50_000
     warmup_steps: 500
     save_total_limit: 1
     dataloader_num_workers: 16
@@ -110,8 +79,7 @@ training:
     save_steps: 1000
     logging_steps: 100
     learning_rate: 1e-4
-    max_steps: 100
-    # max_steps: 75_000
+    max_steps: 75_000
     warmup_steps: 1_000
     save_total_limit: 10
     dataloader_num_workers: 16
