@@ -66,36 +66,17 @@ class SLAM(nn.Module):
     def help(cls):
         print("TODO: help message")
 
-    def _projector_only_trainmode(self, mode: bool = True):
-        super().train(mode)
-
-        # Only linear_projector
-        self.encoder.eval()
-        self.decoder.eval()
-
-        return self
-
-
-    def _projector_n_decoder_trainmode(self, mode: bool = True):
-        super().train(mode)
-
-        # Only train decoder and linear_projector
-        self.encoder.eval()
-
-        # Only train Linear layers
-        for name, param in self.decoder.named_parameters():
-            if not any([linear_indicator in name for linear_indicator in ('fc', 'dense', 'linear')]):
-                param.requires_grad = False
-
-        return self
-
     def train(self, mode: bool = True):
         super().train(mode)
 
-        if self._train_projector_only is True:
-            return self._projector_only_trainmode()
+        super().train(mode)
 
-        return self._projector_n_decoder_trainmode()
+        self.encoder.eval()
+
+        if self._train_projector_only is True:
+            self.decoder.eval()
+
+        return self
 
     def eval(self):
         return super().eval()
