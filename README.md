@@ -10,22 +10,22 @@
 
 <br />
 <div align="center">
-  <a href="https://github.com/Thytu/SLAM">
+  <a href="https://github.com/Thytu/SMIT">
     <img src="https://i.ibb.co/CvLbGX6/SLAM-ASR-logo-v2.png" alt="Logo" width="200" height="200">
   </a>
 
-  <h3 align="center" style="font-size: 200%">SLAM</h3>
+  <h3 align="center" style="font-size: 200%">SMIT</h3>
 
   <p align="center">
-    <b> Bringing audio to LLM </b>
+    <b> A Simple Modality Integration Tool: SMIT  </b>
     <br />
     <br />
     <a href="#getting-started"><strong>Explore the docs</strong></a>
     <br />
     <br />
     <a href="#about-the-project">View Demo</a>
-    · <a href="#about-the-project">More about SLAM</a>
-    · <a href="https://github.com/Thytu/SLAM/issues">Report Bug / Request Feature</a>
+    · <a href="#about-the-project">More about SMIT</a>
+    · <a href="https://github.com/Thytu/SMIT/issues">Report Bug / Request Feature</a>
   </p>
 </div>
 
@@ -49,17 +49,17 @@
 
 ## About The Project
 
-SLAM is a tool to simplify the process of adding audio modality to your LLMs offering a seamless solution with just a single config file. Say goodbye to complex setups and hello to effortlessly enhancing your models with audio capabilities!
+SMIT is a tool to simplify the process of adding audio modality to your LLMs offering a seamless solution with just a single config file. Say goodbye to complex setups and hello to effortlessly enhancing your models with audio capabilities!
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 ## Getting Started
 
-SLAM currently provides a `requirements.txt`, you're invited to use a virtualenv in order to avoid any dependency conflict.
+SMIT currently provides a `requirements.txt`, you're invited to use a virtualenv in order to avoid any dependency conflict.
 ```sh
-git clone https://github.com/Thytu/SLAM/
-cd SLAM
+git clone https://github.com/Thytu/SMIT/
+cd SMIT
 
 pip3 install -r requirements.txt
 ```
@@ -75,9 +75,9 @@ python src/training.py
 
 ## Usage
 
-SLAM simplifies the process of enhancing your LLM with audio capabilities, following the principles outlined in the [SLAM-ASR](https://arxiv.org/abs/2402.08846) paper. By linking a speech encoder to an decoder using a trainable linear projector adding to your LLM the audio modality. SLMA automates the integration process by making it as easy as configuring a single file.
+SMIT simplifies the process of enhancing your LLM with audio capabilities, following the principles outlined in the [SMIT-ASR](https://arxiv.org/abs/2402.08846) paper. By linking a speech encoder to an decoder using a trainable linear projector adding to your LLM the audio modality. SLMA automates the integration process by making it as easy as configuring a single file.
 
-To use SLAM, simply define your desired configurations in the provided config file, it will then handle the rest, seamlessly incorporating the audio modality into your models.
+To use SMIT, simply define your desired configurations in the provided config file, it will then handle the rest, seamlessly incorporating the audio modality into your models.
 
 ## Contributing
 
@@ -104,26 +104,26 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/Thytu/SLAM-ASR.svg?style=for-the-badge&color=blue
-[contributors-url]: https://github.com/Thytu/SLAM/graphs/contributors
-[pr-shield]: https://img.shields.io/github/issues-pr/Thytu/SLAM-ASR.svg?style=for-the-badge
-[pr-url]: https://github.com/Thytu/SLAM/pulls
-[issues]: https://img.shields.io/github/issues/Thytu/SLAM-ASR
-[forks-shield]: https://img.shields.io/github/forks/Thytu/SLAM-ASR.svg?style=for-the-badge&color=blue
-[forks-url]: https://github.com/Thytu/SLAM/network/members
-[stars-shield]: https://img.shields.io/github/stars/Thytu/SLAM-ASR.svg?style=for-the-badge&color=yellow
-[stars-url]: https://github.com/Thytu/SLAM/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Thytu/SLAM-ASR.svg?style=for-the-badge&
-[issues-url]: https://github.com/Thytu/SLAM/issues
-[license-shield]: https://img.shields.io/github/license/Thytu/SLAM-ASR.svg?style=for-the-badge&color=indigo
-[license-url]: https://github.com/Thytu/SLAM/blob/master/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/Thytu/SMIT-ASR.svg?style=for-the-badge&color=blue
+[contributors-url]: https://github.com/Thytu/SMIT/graphs/contributors
+[pr-shield]: https://img.shields.io/github/issues-pr/Thytu/SMIT-ASR.svg?style=for-the-badge
+[pr-url]: https://github.com/Thytu/SMIT/pulls
+[issues]: https://img.shields.io/github/issues/Thytu/SMIT-ASR
+[forks-shield]: https://img.shields.io/github/forks/Thytu/SMIT-ASR.svg?style=for-the-badge&color=blue
+[forks-url]: https://github.com/Thytu/SMIT/network/members
+[stars-shield]: https://img.shields.io/github/stars/Thytu/SMIT-ASR.svg?style=for-the-badge&color=yellow
+[stars-url]: https://github.com/Thytu/SMIT/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Thytu/SMIT-ASR.svg?style=for-the-badge&
+[issues-url]: https://github.com/Thytu/SMIT/issues
+[license-shield]: https://img.shields.io/github/license/Thytu/SMIT-ASR.svg?style=for-the-badge&color=indigo
+[license-url]: https://github.com/Thytu/SMIT/blob/master/LICENSE
 
 ## TODO List
 
 ### Model
-- [X] `SLAM` must accepts a batched tensor as input (currently expects a list representing a single audio sample)
-- [ ] `SLAM.encoder` should not have to use the fined-tunable version of `hubert-large-ls960`
-- [X] `SLAM.generate_transcript` method must be autoregressive and fully transcribe the input audio
+- [X] `SMIT` must accepts a batched tensor as input (currently expects a list representing a single audio sample)
+- [ ] `SMIT.encoder` should not have to use the fined-tunable version of `hubert-large-ls960`
+- [X] `SMIT.generate_transcript` method must be autoregressive and fully transcribe the input audio
 
 ### Data
 - [X] Write the data-preprocessing functions
