@@ -1,5 +1,6 @@
 <div id="top"></div>
 
+
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
@@ -7,11 +8,10 @@
 [![PUll Request][pr-shield]][pr-url]
 [![MIT License][license-shield]][license-url]
 
-
 <br />
 <div align="center">
   <a href="https://github.com/Thytu/SMIT">
-    <img src="https://i.ibb.co/CvLbGX6/SLAM-ASR-logo-v2.png" alt="Logo" width="200" height="200">
+    <img src="https://i.ibb.co/stFyYnQ/SMIT-logo-v0-compressed.png" alt="Logo" width="400" height="400">
   </a>
 
   <h3 align="center" style="font-size: 200%">SMIT</h3>
