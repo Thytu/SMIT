@@ -142,18 +142,18 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/Thytu/SMIT-ASR.svg?style=for-the-badge&color=blue
+[contributors-shield]: https://img.shields.io/github/contributors/Thytu/SMIT.svg?style=for-the-badge&color=blue
 [contributors-url]: https://github.com/Thytu/SMIT/graphs/contributors
-[pr-shield]: https://img.shields.io/github/issues-pr/Thytu/SMIT-ASR.svg?style=for-the-badge
+[pr-shield]: https://img.shields.io/github/issues-pr/Thytu/SMIT.svg?style=for-the-badge
 [pr-url]: https://github.com/Thytu/SMIT/pulls
-[issues]: https://img.shields.io/github/issues/Thytu/SMIT-ASR
-[forks-shield]: https://img.shields.io/github/forks/Thytu/SMIT-ASR.svg?style=for-the-badge&color=blue
+[issues]: https://img.shields.io/github/issues/Thytu/SMIT
+[forks-shield]: https://img.shields.io/github/forks/Thytu/SMIT.svg?style=for-the-badge&color=blue
 [forks-url]: https://github.com/Thytu/SMIT/network/members
-[stars-shield]: https://img.shields.io/github/stars/Thytu/SMIT-ASR.svg?style=for-the-badge&color=yellow
+[stars-shield]: https://img.shields.io/github/stars/Thytu/SMIT.svg?style=for-the-badge&color=yellow
 [stars-url]: https://github.com/Thytu/SMIT/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Thytu/SMIT-ASR.svg?style=for-the-badge&
+[issues-shield]: https://img.shields.io/github/issues/Thytu/SMIT.svg?style=for-the-badge&
 [issues-url]: https://github.com/Thytu/SMIT/issues
-[license-shield]: https://img.shields.io/github/license/Thytu/SMIT-ASR.svg?style=for-the-badge&color=indigo
+[license-shield]: https://img.shields.io/github/license/Thytu/SMIT.svg?style=for-the-badge&color=indigo
 [license-url]: https://github.com/Thytu/SMIT/blob/master/LICENSE
 
 ## TODO List
