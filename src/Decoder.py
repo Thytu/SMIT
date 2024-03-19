@@ -5,8 +5,9 @@ from logging import getLogger
 from dataclasses import dataclass
 from collections import OrderedDict
 from typing import Optional, List, Union
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import prepare_model_for_kbit_training
 from transformers.modeling_outputs import CausalLMOutputWithPast
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 
 @dataclass
@@ -23,10 +24,14 @@ class Decoder(nn.Module):
             model_name: str,
             audio_placeholder: Optional[str] = None,
             prompt_template: Optional[str] = None,
-            *args, **kwargs
+            *args, **kwargs,
     ) -> None:
 
-        super().__init__(*args, **kwargs)
+        quantization_config = None
+        if (quantization_config_dict := kwargs.pop("quantization_config", None)) is not None:
+            quantization_config = BitsAndBytesConfig(**quantization_config_dict)
+
+        super().__init__()
 
         self.logger = getLogger(__name__)
 
@@ -41,7 +46,12 @@ class Decoder(nn.Module):
         default_prompt_template = (f"{self.tokenizer.eos_token}[INST]" " {instruct} [/INST]")
         self.instruct_template = prompt_template if prompt_template is not None else default_prompt_template
 
-        self.model: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(model_name)
+        self.model: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            quantization_config=quantization_config,
+        )
+
+        self.model = prepare_model_for_kbit_training(self.model)
 
     def _generate_embedding_without_audio(self, prompt: str, device_to_use: str):
 
