@@ -34,8 +34,8 @@
   <summary>Table of Contents</summary>
   <ol>
     <li><a href="#about-the-project">About The Project</a></li>
-    <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#usage">Usage</a></li>
+    <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -48,10 +48,19 @@
 
 ## About The Project
 
-SMIT is a tool to simplify the process of adding audio modality to your LLMs offering a seamless solution with just a single config file. Say goodbye to complex setups and hello to effortlessly enhancing your models with audio capabilities!
+SMIT is a versatile tool designed to streamline the integration of audio modality into your LLMs. Currently, SMIT exclusively supports audio as a new modality. However, our goal is to expand its capabilities to accommodate any new modality seamlessly. We welcome contributions from the open-source community to help us achieve this aim.
+
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+
+## Usage
+
+SMIT simplifies the process of enhancing your LLM with audio capabilities, following the principles outlined in the [this paper](https://arxiv.org/abs/2402.08846). By linking a speech encoder to an decoder using a trainable linear projector adding to your LLM the audio modality. SLMA automates the integration process by making it as easy as configuring a single file.
+
+To use SMIT, simply define your desired configurations in the provided config file, it will then handle the rest, seamlessly incorporating the audio modality into your models.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Getting Started
 
@@ -109,13 +118,6 @@ Note that [hydra](https://hydra.cc/docs/advanced/override_grammar/basic/) allows
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
-## Usage
-
-SMIT simplifies the process of enhancing your LLM with audio capabilities, following the principles outlined in the [this paper](https://arxiv.org/abs/2402.08846). By linking a speech encoder to an decoder using a trainable linear projector adding to your LLM the audio modality. SLMA automates the integration process by making it as easy as configuring a single file.
-
-To use SMIT, simply define your desired configurations in the provided config file, it will then handle the rest, seamlessly incorporating the audio modality into your models.
 
 ## Contributing
 
