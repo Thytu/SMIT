@@ -9,9 +9,28 @@ model:
     audio_placeholder: null # uses default one
     prompt_template: null # uses default one
 
-# TODO: handle diverse dataset
-# NOTE: unused at this tim
-# TODO: handle filtering
+    quantization_config:
+      load_in_4bit: True
+      bnb_4bit_use_double_quant: True
+      bnb_4bit_quant_type: nf4
+      bnb_4bit_compute_dtype: bfloat16
+
+    peft:
+      peft_type: LORA
+      r: 8
+      lora_alpha: 32
+      lora_dropout: 0.05
+      bias: none
+      target_modules:
+        - q_proj
+        - k_proj
+        - v_proj
+        - o_proj
+        - gate_proj
+        - up_proj
+        - down_proj
+        - lm_head
+
 datasets:
 
   librispeech_asr:
@@ -50,26 +69,52 @@ datasets:
         columns: ["labels", "inputs.instruct"]
         value: 0
 
+pretraining:
+  wandb_project_name: SMIT_ALIGNEMENT
+  early_stopping_patience: 5
+  resume_from_checkpoint: null
+  training_args:
+    save_only_model: True
+    output_dir: "/scratch/SMIT-alignement-outputs/"
+    # group_by_length=True, # Makes the training init super long (~2h)
+    bf16: True
+    per_device_train_batch_size: 4
+    per_device_eval_batch_size: 16
+    evaluation_strategy: "steps"
+    eval_steps: 1500
+    save_steps: 1500
+    logging_steps: 100
+    learning_rate: 1e-4
+    max_steps: 100
+    # max_steps: 50_000
+    warmup_steps: 500
+    save_total_limit: 1
+    dataloader_num_workers: 16
+    report_to: "wandb"
+    weight_decay: 0
+    load_best_model_at_end: True
+
 training:
+  wandb_project_name: SMIT_TRAINING
   early_stopping_patience: 9
   resume_from_checkpoint: null
-
-training_args:
-  output_dir: "/scratch/SLAM-ASR-outputs/model/"
-  # group_by_length=True, # Makes the training init super long (~2h)
-  bf16: True
-  per_device_train_batch_size: 2
-  gradient_accumulation_steps: 2
-  per_device_eval_batch_size: 16
-  evaluation_strategy: "steps"
-  eval_steps: 1000
-  save_steps: 1000
-  logging_steps: 100
-  learning_rate: 1e-4
-  max_steps: 100_000
-  warmup_steps: 1_000
-  save_total_limit: 10
-  dataloader_num_workers: 16
-  report_to: "wandb"
-  weight_decay: 0
-  load_best_model_at_end: True
+  training_args:
+    output_dir: "/scratch/SMIT-ASR-outputs/model/"
+    # group_by_length=True, # Makes the training init super long (~2h)
+    bf16: True
+    per_device_train_batch_size: 2
+    gradient_accumulation_steps: 2
+    per_device_eval_batch_size: 16
+    evaluation_strategy: "steps"
+    eval_steps: 1000
+    save_steps: 1000
+    logging_steps: 100
+    learning_rate: 1e-4
+    max_steps: 100
+    # max_steps: 75_000
+    warmup_steps: 1_000
+    save_total_limit: 10
+    dataloader_num_workers: 16
+    report_to: "wandb"
+    weight_decay: 0
+    load_best_model_at_end: True
