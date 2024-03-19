@@ -17,15 +17,14 @@
   <h3 align="center" style="font-size: 200%">SMIT</h3>
 
   <p align="center">
-    <b> A Simple Modality Integration Tool: SMIT  </b>
+    <b> A Simple Modality Integration Tool </b>
     <br />
     <br />
     <a href="#getting-started"><strong>Explore the docs</strong></a>
     <br />
     <br />
-    <a href="#about-the-project">View Demo</a>
-    · <a href="#about-the-project">More about SMIT</a>
-    · <a href="https://github.com/Thytu/SMIT/issues">Report Bug / Request Feature</a>
+    <a href="#about-the-project">More about SMIT</a>
+    · <a href="https://github.com/Thytu/SMIT/issues">Report Bug or Request Feature</a>
   </p>
 </div>
 
@@ -37,10 +36,10 @@
     <li><a href="#about-the-project">About The Project</a></li>
     <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
     <li><a href="#contact">Contact</a></li>
+    <li><a href="#todo-list">Roadmap</a></li>
   </ol>
 </details>
 
@@ -56,6 +55,43 @@ SMIT is a tool to simplify the process of adding audio modality to your LLMs off
 
 ## Getting Started
 
+Welcome to SMIT! Follow these simple steps to get started:
+
+**Clone the Repository**: Begin by cloning the SMIT repository to your local machine using Git:
+```sh
+git clone https://github.com/Thytu/SMIT/
+cd SMIT
+```
+
+**Set Up Virtual Environment**: We highly recommend using a virtual environment to manage dependencies and prevent conflicts. Create and activate a virtual environment using your preferred tool (e.g., virtualenv, conda):
+```sh
+# Example using virtualenv
+virtualenv venv
+source venv/bin/activate
+```
+
+**Install Dependencies**: Once inside the project directory and your virtual environment is activated, install the required dependencies listed in requirements.txt using pip:
+
+```sh
+pip install -r requirements.txt
+```
+
+**Run the Example**: You can quickly run the default example provided in SMI by executing the following command:
+
+```sh
+python src/main.py
+```
+
+**Customize Your Model**: To customize your own Language Model (LLM), create a [configuration file](docs/config-file.md). You can use the provided [config file template](config/default.yaml) as a starting point. Then, use [Hydra syntax](https://hydra.cc/docs/advanced/override_grammar/basic/) to provide your configuration file:
+
+```sh
+python src/main.py model=my_config
+```
+
+**Advanced Configuration**: Hydra offers extensive options for parameter overriding, allowing you to tailor the model according to your specific requirements. Refer to [Hydra documentation](https://hydra.cc/docs/intro/) for more details on customization options.
+
+Now you're all set to explore SMIT and unleash the power of machine learning! Feel free to dive into the codebase, experiment with different configurations, and contribute to the project. If you encounter any issues or have questions, don't hesitate to reach out to us. Happy coding!
+
 SMIT currently provides a `requirements.txt`, you're invited to use a virtualenv in order to avoid any dependency conflict.
 ```sh
 git clone https://github.com/Thytu/SMIT/
@@ -64,18 +100,20 @@ cd SMIT
 pip3 install -r requirements.txt
 ```
 
-Once the dependencies installed you can either launch the default example or custom your own LLM by writing a [config file](TODO)  or using the [CLI](TODO).
-
+Once the dependencies installed you can either launch the default example or custom your own LLM by writing a [config file](TODO) and providing it using [hydra](https://hydra.cc/docs/advanced/override_grammar/basic/)'s syntax :
 ```py
-python src/training.py
+python src/main.py model=my_config
 ```
+
+Note that [hydra](https://hydra.cc/docs/advanced/override_grammar/basic/) allows you to override any parameters.
+
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 ## Usage
 
-SMIT simplifies the process of enhancing your LLM with audio capabilities, following the principles outlined in the [SMIT-ASR](https://arxiv.org/abs/2402.08846) paper. By linking a speech encoder to an decoder using a trainable linear projector adding to your LLM the audio modality. SLMA automates the integration process by making it as easy as configuring a single file.
+SMIT simplifies the process of enhancing your LLM with audio capabilities, following the principles outlined in the [this paper](https://arxiv.org/abs/2402.08846). By linking a speech encoder to an decoder using a trainable linear projector adding to your LLM the audio modality. SLMA automates the integration process by making it as easy as configuring a single file.
 
 To use SMIT, simply define your desired configurations in the provided config file, it will then handle the rest, seamlessly incorporating the audio modality into your models.
 
@@ -129,9 +167,9 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 - [X] Write the data-preprocessing functions
 - [X] data-preprocessing must capitalize the text properly (not all cap)
 - [X] Export processed dataset locally to be loaded at training time
-- [ ] Reduce number of samples for continous training
-- [ ] Link hydra to data_handler
-- [ ] Support other datasets
+- [X] Reduce number of samples for continous training
+- [X] Link hydra to data_handler
+- [X] Support other datasets
 - [ ] Create audio instruct dataset
 
 ### Training
@@ -140,8 +178,8 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 - [X] Train the model on the full set of librispeech
 - [X] Fix why the model doesn't procudes EOS (or issue on inference fn?)
 - [X] Padding should be set to max(len_of_inputs) instead of always 2048
-- [ ] Pre-training on projector
-- [ ] Support other LLM
+- [X] Pre-training on projector
+- [X] Support other LLM
 - [ ] Support other speech encoder
 
 ### Evaluation
@@ -149,8 +187,8 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 - [ ] Check if it impacts phi2 results on OpenLLM-Leaderboard
 
 ### Distribution
-- [ ] Use [hydra-zen](https://mit-ll-responsible-ai.github.io/hydra-zen/) to create a user CLI
-- [ ] Reduce RAM and VRAM usage
+- [ ] Reduce RAM usage
+- [X] Reduce VRAM usage
 - [ ] Write a proper README
 - [ ] Write a "How to use the model" doc with everything required for inference (i.e using feature_extractor)
 - [ ] Wrape in docker
