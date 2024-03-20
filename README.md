@@ -11,7 +11,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Thytu/SMIT">
-    <img src="https://i.ibb.co/stFyYnQ/SMIT-logo-v0-compressed.png" alt="Logo" width="400" height="400">
+    <img src="https://i.ibb.co/cY65gkZ/SMIT-logo-v1.webp" alt="Logo" width="80%" height="80%">
   </a>
 
   <h3 align="center" style="font-size: 200%">SMIT</h3>
@@ -102,30 +102,13 @@ python src/main.py model=my_config
 
 **Advanced Configuration**: Hydra offers extensive options for parameter overriding, allowing you to tailor the model according to your specific requirements. Refer to [Hydra documentation](https://hydra.cc/docs/intro/) for more details on customization options.
 
-Now you're all set to explore SMIT and unleash the power of machine learning! Feel free to dive into the codebase, experiment with different configurations, and contribute to the project. If you encounter any issues or have questions, don't hesitate to reach out to us. Happy coding!
-
-SMIT currently provides a `requirements.txt`, you're invited to use a virtualenv in order to avoid any dependency conflict.
-```sh
-git clone https://github.com/Thytu/SMIT/
-cd SMIT
-
-pip3 install -r requirements.txt
-```
-
-Once the dependencies installed you can either launch the default example or custom your own LLM by writing a [config file](docs/config-file.md) and providing it using [hydra](https://hydra.cc/docs/advanced/override_grammar/basic/)'s syntax :
-```py
-python src/main.py model=my_config
-```
-
-Note that [hydra](https://hydra.cc/docs/advanced/override_grammar/basic/) allows you to override any parameters.
-
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.\
-If you have a suggestion that would make this better, please fork the repo and create a pull request.
+There are mutliple ways to contribute to that projects, either regarding the UX (i.e doc / even making the example faster) or regarding the core product itself (i.e handling Vision modality).
+Any contributions you make are **greatly appreciated**, if you have a suggestion that would make this better feel free to tell me :D You can also check the <a href="#todo-list">TODO list</a> for more things to improve.
 
 Don't forget to give the project a star! 🌟 Thanks again!
 
@@ -138,10 +121,13 @@ This project draws significant inspiration from the [An Embarrassingly Simple Ap
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
-
 ## Contact
 
-Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gmail.com
+Hey, I'm Valentin De Matos, passionate about AI and always working on some new side project.
+
+You can reach me out at vltn.dematos@gmail.com and if you want more information you can always
+- Check my website [@hytu.com](https://thytu.com/)
+- Follow me on twitter [@ThytuVDM](https://twitter.com/ThytuVDM)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -185,7 +171,7 @@ Valentin De Matos - [@ThytuVDM](https://twitter.com/ThytuVDM) - vltn.dematos@gma
 - [X] Padding should be set to max(len_of_inputs) instead of always 2048
 - [X] Pre-training on projector
 - [X] Support other LLM
-- [ ] Support other speech encoder
+- [X] Support other speech encoder
 
 ### Evaluation
 - [X] Evaluate on librispeech
