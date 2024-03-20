@@ -39,33 +39,34 @@ datasets:
         columns: ["labels", "inputs.instruct"]
         value: 0
 
-pretraining:
-  wandb_project_name: SMIT_ALIGNEMENT
-  early_stopping_patience: 5
-  resume_from_checkpoint: null
-  training_args:
-    save_only_model: True
-    output_dir: "/scratch/SMIT-alignement-outputs/"
-    # group_by_length=True, # Makes the training init super long (~2h)
-    bf16: True
-    per_device_train_batch_size: 4
-    per_device_eval_batch_size: 16
-    evaluation_strategy: "steps"
-    eval_steps: 1500
-    save_steps: 1500
-    logging_steps: 100
-    learning_rate: 1e-4
-    max_steps: 50_000
-    warmup_steps: 500
-    save_total_limit: 1
-    dataloader_num_workers: 16
-    report_to: "wandb"
-    weight_decay: 0
-    load_best_model_at_end: True
+# Deactivated by default to make the training process faster but you're encouraged to do pretraining
+# pretraining:
+#   wandb_project_name: SMIT_ALIGNEMENT
+#   early_stopping_patience: 5
+#   resume_from_checkpoint: null
+#   training_args:
+#     save_only_model: True
+#     output_dir: "/scratch/SMIT-alignement-outputs/"
+#     # group_by_length=True, # Makes the training init super long (~2h)
+#     bf16: True
+#     per_device_train_batch_size: 4
+#     per_device_eval_batch_size: 16
+#     evaluation_strategy: "steps"
+#     eval_steps: 1500
+#     save_steps: 1500
+#     logging_steps: 100
+#     learning_rate: 1e-4
+#     max_steps: 50_000
+#     warmup_steps: 500
+#     save_total_limit: 1
+#     dataloader_num_workers: 16
+#     report_to: "wandb"
+#     weight_decay: 0
+#     load_best_model_at_end: True
 
 training:
   wandb_project_name: SMIT_TRAINING
-  early_stopping_patience: 9
+  early_stopping_patience: 5
   resume_from_checkpoint: null
   training_args:
     output_dir: "/scratch/SMIT-ASR-outputs/model/"
@@ -73,15 +74,15 @@ training:
     bf16: True
     per_device_train_batch_size: 2
     gradient_accumulation_steps: 2
-    per_device_eval_batch_size: 16
+    per_device_eval_batch_size: 2
     evaluation_strategy: "steps"
-    eval_steps: 1000
-    save_steps: 1000
+    eval_steps: 2000
+    save_steps: 2000
     logging_steps: 100
     learning_rate: 1e-4
     max_steps: 75_000
     warmup_steps: 1_000
-    save_total_limit: 10
+    save_total_limit: 6
     dataloader_num_workers: 16
     report_to: "wandb"
     weight_decay: 0
