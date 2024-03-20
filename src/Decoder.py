@@ -51,7 +51,8 @@ class Decoder(nn.Module):
             quantization_config=quantization_config,
         )
 
-        self.model = prepare_model_for_kbit_training(self.model)
+        if quantization_config is not None:
+            self.model = prepare_model_for_kbit_training(self.model)
 
     def _generate_embedding_without_audio(self, prompt: str, device_to_use: str):
 
