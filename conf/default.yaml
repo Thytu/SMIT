@@ -1,5 +1,6 @@
 defaults:
   - model: example
+  - _self_
 
 datasets:
 
