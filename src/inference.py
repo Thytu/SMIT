@@ -1,14 +1,17 @@
 import torch
+import hydra
 import torchaudio
 
 from SLAM import SLAM
+from omegaconf import DictConfig
 from safetensors import safe_open
 from datasets import load_from_disk
+from peft import LoraConfig, TaskType, get_peft_model
 
 
 def __load_weights(model, path_to_weights):
     tensors = {}
-    with safe_open(path_to_weights, framework="pt", device=model.decoder.model.device) as f:
+    with safe_open(path_to_weights, framework="pt") as f:
         for k in f.keys():
             tensors[k] = f.get_tensor(k)
 
@@ -16,21 +19,39 @@ def __load_weights(model, path_to_weights):
 
     return model
 
+# TODO: this should be integrated to SLAM
+def load_trained_model(cfg, path_to_weights):
+    model = SLAM(**cfg.model).eval()
+
+    if cfg.model.decoder.get("peft"):
+        peft_config = LoraConfig(**{
+            "task_type": TaskType.CAUSAL_LM,
+            "inference_mode": False,
+            **cfg.model.decoder["peft"],
+        })
+
+        model.decoder.model = get_peft_model(
+            model=model.decoder.model,
+            peft_config=peft_config,
+        )
+
+    return __load_weights(model, path_to_weights)
+
 
 def infer_over_audio(
+    cfg: DictConfig,
     path_to_model: str,
     save_audio_sample: bool = False,
 ):
 
     device_to_use = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    model = __load_weights(SLAM(decode_name="abacaj/phi-2-super"), path_to_model)
-    model.eval().to(device=device_to_use)
+    model = load_trained_model(cfg, path_to_model).to(device=device_to_use)
 
     validation_set = load_from_disk("outputs/dataset/")['validation']
 
     for i, sample in enumerate(iter(validation_set)):
-        if i >= 10 and sample["inputs"].get("raw_audio") is not None:
+        if i >= 0 and sample["inputs"].get("raw_audio") is not None:
             break
 
     raw_speech = sample["inputs"]["raw_audio"]
@@ -44,22 +65,19 @@ def infer_over_audio(
     input_ids = model.generate_transcript(raw_speech)
 
     transcript = model.decoder.tokenizer.batch_decode(input_ids)
-
     print(f"{transcript=}")
     print(f"{labels=}")
 
 
 def infer_over_instruction(
+    cfg: DictConfig,
     path_to_model: str,
 ):
 
     device_to_use = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    model = __load_weights(SLAM(decode_name="abacaj/phi-2-super"), path_to_model)
-    model.eval().to(device=device_to_use)
-
+    model = load_trained_model(cfg, path_to_model).to(device=device_to_use)
     tokenizer = model.decoder.tokenizer
-
 
     messages = [
         {"role": "user", "content": "Hello, what's the capital for France? And what's french people favorite meal?"}
@@ -85,12 +103,22 @@ def infer_over_instruction(
     print(completion)
 
 
-if __name__ == "__main__":
+@hydra.main(version_base=None, config_path="../conf", config_name="default")
+def main(cfg : DictConfig):
+
+    path_to_model = "/scratch/SMIT-ASR-outputs/model/checkpoint-33000/model.safetensors"
+
     infer_over_audio(
-        path_to_model="/scratch/SLAM-ASR-outputs/model/checkpoint-51000/model.safetensors",
+        cfg=cfg,
+        path_to_model=path_to_model,
         save_audio_sample=True,
     )
 
     infer_over_instruction(
-        path_to_model="/scratch/SLAM-ASR-outputs/model/checkpoint-51000/model.safetensors",
+        cfg=cfg,
+        path_to_model=path_to_model,
     )
+
+
+if __name__ == "__main__":
+    main()
