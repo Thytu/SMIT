@@ -41,7 +41,7 @@ datasets:
 
 # Deactivated by default to make the training process faster but you're encouraged to do pretraining
 # pretraining:
-#   wandb_project_name: SMIT_ALIGNEMENT
+#   wandb_project_name: SMIT-Pretraining
 #   early_stopping_patience: 5
 #   resume_from_checkpoint: null
 #   training_args:
@@ -65,7 +65,7 @@ datasets:
 #     load_best_model_at_end: True
 
 training:
-  wandb_project_name: SMIT_TRAINING
+  wandb_project_name: SMIT-Training
   early_stopping_patience: 5
   resume_from_checkpoint: null
   training_args:
