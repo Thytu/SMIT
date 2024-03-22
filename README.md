@@ -94,6 +94,8 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
+This will train the amazing [abacaj/phi-2-super](https://huggingface.co/abacaj/phi-2-super/tree/main) model to do ASR using the `librispeech_asr` dataset and [facebook/hubert-large-ls960-ft](https://huggingface.co/facebook/hubert-large-ls960-ft) as speech encoder, reproducing the [Thytu/phi-2-audio-super](https://huggingface.co/Thytu/phi-2-audio-super/tree/main) model. (Requires at least 40Go of VRAM)
+
 **Customize Your Model**: To customize your own Language Model (LLM), create a [configuration file](docs/config-file.md). You can use the provided [config file template](config/default.yaml) as a starting point. Then, use [Hydra syntax](https://hydra.cc/docs/advanced/override_grammar/basic/) to provide your configuration file:
 
 ```sh
