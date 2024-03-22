@@ -37,8 +37,8 @@ class SLAM(nn.Module):
             raise ValueError("SLAM expects to receive a dict named 'decoder' as input. See SLAM.help()")
 
         self.cfg = {
-            "encoder": kwargs.pop("encoder"),
-            "decoder": kwargs.pop("decoder"),
+            "encoder": OmegaConf.to_container(kwargs.pop("encoder")),
+            "decoder": OmegaConf.to_container(kwargs.pop("decoder")),
         }
 
         super().__init__(*args, **kwargs)

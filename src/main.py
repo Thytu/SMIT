@@ -52,8 +52,8 @@ class SMITTrainer(Trainer):
         super().save_model(output_dir, _internal_call)
 
         self.__add_cfg_to_safetensor_metadata(
-            path_to_safetensor=os.path.join(output_dir, "model.safetensor"),
-            cfg=json.dumps(OmegaConf.to_container(self.model.cfg, resolve=True, throw_on_missing=True))
+            path_to_safetensor=os.path.join(output_dir, "model.safetensors"),
+            cfg=json.dumps(self.model.cfg),
         )
 
 
