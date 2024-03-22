@@ -1,14 +1,18 @@
+import json
 import torch
 
 from torch import nn, Tensor
 from Encoder import Encoder
+from omegaconf import OmegaConf
 from dataclasses import dataclass
 from collections import OrderedDict
-from typing import Optional, List, Union, Dict
+from safetensors import safe_open
 from Decoder import Decoder, DecoderInput
 from transformers import Wav2Vec2Processor
 from LinearProjector import LinearProjector
 from FramesDownSampler import FramesDownSampler
+from peft import LoraConfig, TaskType, get_peft_model
+from typing import Optional, List, Union, Dict, Tuple, Any
 from transformers.modeling_outputs import CausalLMOutputWithPast
 from transformers.generation import (
     LogitNormalization,
@@ -31,22 +35,23 @@ class SLAM(nn.Module):
         if "encoder" not in kwargs:
             raise ValueError("SLAM expects to receive a dict named 'encoder' as input. See SLAM.help()")
 
-        encoder_args = kwargs.pop("encoder")
-
         if "decoder" not in kwargs:
             raise ValueError("SLAM expects to receive a dict named 'decoder' as input. See SLAM.help()")
 
-        decoder_args = kwargs.pop("decoder")
+        self.cfg = {
+            "encoder": OmegaConf.to_container(kwargs.pop("encoder")),
+            "decoder": OmegaConf.to_container(kwargs.pop("decoder")),
+        }
 
         super().__init__(*args, **kwargs)
 
         self._train_projector_only = False
 
-        self.encoder = Encoder(**encoder_args)
+        self.encoder = Encoder(**self.cfg["encoder"])
 
         self.down_sampler = FramesDownSampler(k=5)
 
-        self.decoder = Decoder(**decoder_args)
+        self.decoder = Decoder(**self.cfg["decoder"])
 
         self.linear_projector = LinearProjector(
             input_dim=self.encoder.output_dim,
@@ -66,9 +71,57 @@ class SLAM(nn.Module):
     def help(cls):
         print("TODO: help message")
 
-    def train(self, mode: bool = True):
-        super().train(mode)
+    @classmethod
+    def _load_safetensors(cls, path_to_safetensors) -> Tuple[Dict[str, Any], Dict[str, str]]:
+        tensors = {}
 
+        with safe_open(path_to_safetensors, framework="pt") as f:
+            metadata = f.metadata()
+
+            for k in f.keys():
+                tensors[k] = f.get_tensor(k)
+
+        return tensors, metadata
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        path_to_safetensors: str,
+        cfg: Optional[Dict[str, str]] = None,
+    ):
+        tensors, metadata = cls._load_safetensors(path_to_safetensors)
+
+        cfg = cfg if cfg is not None else metadata.get("cfg")
+
+        if cfg is None:
+            raise RuntimeError(
+                "No configuration found in the metadata of the provided safetensors file."
+                " Please ensure that the safetensors file contains the necessary configuration information"
+                " or provide it explicitly through the 'cfg' argument when calling 'from_pretrained'."
+            )
+
+        cfg = OmegaConf.create(json.loads(cfg))
+
+        model = SLAM(**cfg)
+
+        if cfg.decoder.get("peft"):
+
+            peft_config = LoraConfig(**{
+                "task_type": TaskType.CAUSAL_LM,
+                "inference_mode": False,
+                **cfg.decoder["peft"],
+            })
+
+            model.decoder.model = get_peft_model(
+                model=model.decoder.model,
+                peft_config=peft_config,
+            )
+
+        model.load_state_dict(state_dict=tensors, strict=True)
+
+        return model
+
+    def train(self, mode: bool = True):
         super().train(mode)
 
         self.encoder.eval()
