@@ -39,7 +39,6 @@
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#todo-list">Roadmap</a></li>
   </ol>
 </details>
 
@@ -110,7 +109,7 @@ python src/main.py model=my_config
 ## Contributing
 
 There are mutliple ways to contribute to that projects, either regarding the UX (i.e doc / even making the example faster) or regarding the core product itself (i.e handling Vision modality).
-Any contributions you make are **greatly appreciated**, if you have a suggestion that would make this better feel free to tell me :D You can also check the <a href="#todo-list">TODO list</a> for more things to improve.
+Any contributions you make are **greatly appreciated**, if you have a suggestion that would make this better feel free to tell me :D You can also check the [open issues](https://github.com/Thytu/SMIT/issues) for more things to improve.
 
 Don't forget to give the project a star! 🌟 Thanks again!
 
@@ -128,7 +127,7 @@ This project draws significant inspiration from the [An Embarrassingly Simple Ap
 Hey, I'm Valentin De Matos, passionate about AI and always working on some new side project.
 
 You can reach me out at vltn.dematos@gmail.com and if you want more information you can always
-- Check my website [@hytu.com](https://thytu.com/)
+- Check my website [thytu.com](https://thytu.com/)
 - Follow me on twitter [@ThytuVDM](https://twitter.com/ThytuVDM)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -148,48 +147,3 @@ You can reach me out at vltn.dematos@gmail.com and if you want more information 
 [issues-url]: https://github.com/Thytu/SMIT/issues
 [license-shield]: https://img.shields.io/github/license/Thytu/SMIT.svg?style=for-the-badge&color=indigo
 [license-url]: https://github.com/Thytu/SMIT/blob/master/LICENSE
-
-## TODO List
-
-### Model
-- [X] `SMIT` must accepts a batched tensor as input (currently expects a list representing a single audio sample)
-- [ ] `SMIT.encoder` should not have to use the fined-tunable version of `hubert-large-ls960`
-- [X] `SMIT.generate_transcript` method must be autoregressive and fully transcribe the input audio
-
-### Data
-- [X] Write the data-preprocessing functions
-- [X] data-preprocessing must capitalize the text properly (not all cap)
-- [X] Export processed dataset locally to be loaded at training time
-- [X] Reduce number of samples for continous training
-- [X] Link hydra to data_handler
-- [X] Support other datasets
-- [ ] Create audio instruct dataset
-
-### Training
-- [X] Write the training functions
-- [X] Overfeat the model on a subset of librispeech
-- [X] Train the model on the full set of librispeech
-- [X] Fix why the model doesn't procudes EOS (or issue on inference fn?)
-- [X] Padding should be set to max(len_of_inputs) instead of always 2048
-- [X] Pre-training on projector
-- [X] Support other LLM
-- [X] Support other speech encoder
-
-### Evaluation
-- [X] Evaluate on librispeech
-- [ ] Check if it impacts phi2 results on OpenLLM-Leaderboard
-
-### Distribution
-- [ ] Reduce RAM usage
-- [X] Reduce VRAM usage
-- [ ] Write a proper README
-- [ ] Write a "How to use the model" doc with everything required for inference (i.e using feature_extractor)
-- [ ] Wrape in docker
-- [X] Upload model to Hugging-Face
-- [ ] Create a Hugging-Face Space for the model
-- [ ] Record a Video reproducing the projects
-- [ ] Share over HF's discord in i-made-this channel
-- [ ] Write a blog post presenting the projects and its inner working
-- [ ] Present the project over twitter
-
-<p align="right">(<a href="#top">back to top</a>)</p>
