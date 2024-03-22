@@ -1,4 +1,5 @@
 import os
+import json
 import enum
 import wandb
 import hydra
@@ -6,10 +7,12 @@ import torch
 import numpy as np
 
 from SLAM import SLAM
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
+from safetensors import safe_open
 from typing import Dict, Optional
 from contextlib import nullcontext
 from datasets import load_from_disk
+from safetensors.torch import save_file
 from evaluate import load as load_metric
 from DataCollator import DataCollator
 from transformers import (
@@ -25,6 +28,33 @@ class TrainingStep(str, enum.Enum):
     PRETRAINING = "pretraining"
     TRAINING = "training"
 
+
+class SMITTrainer(Trainer):
+
+    @staticmethod
+    def __add_cfg_to_safetensor_metadata(path_to_safetensor, cfg):
+        tensors = {}
+
+        with safe_open(path_to_safetensor, framework="pt") as f:
+            metadata: Dict[str, str] = f.metadata()
+
+            for k in f.keys():
+                tensors[k] = f.get_tensor(k)
+
+        metadata["cfg"] = cfg
+        save_file(tensors, filename=path_to_safetensor, metadata=metadata)
+
+    def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
+        """
+        Override the default Trainser.save method in order to integrate model's config to safetensor metadata
+        """
+
+        super().save_model(output_dir, _internal_call)
+
+        self.__add_cfg_to_safetensor_metadata(
+            path_to_safetensor=os.path.join(output_dir, "model.safetensor"),
+            cfg=json.dumps(OmegaConf.to_container(self.model.cfg, resolve=True, throw_on_missing=True))
+        )
 
 
 def compute_metrics(pred, processor: Wav2Vec2Processor) -> Dict[str, float]:
@@ -103,7 +133,7 @@ def train_model(
 
     # TODO: save only the projector, not encoder/decoder
     # CF https://stackoverflow.com/questions/69651839/is-there-a-way-to-save-only-the-model-with-huggingface-trainer
-    trainer = Trainer(
+    trainer = SMITTrainer(
         model=model,
         data_collator=data_collator,
         args=training_args,
