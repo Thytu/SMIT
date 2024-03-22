@@ -1,7 +1,9 @@
+import json
 import torch
 
 from torch import nn, Tensor
 from Encoder import Encoder
+from omegaconf import OmegaConf
 from dataclasses import dataclass
 from collections import OrderedDict
 from safetensors import safe_open
@@ -97,6 +99,8 @@ class SLAM(nn.Module):
                 " Please ensure that the safetensors file contains the necessary configuration information"
                 " or provide it explicitly through the 'cfg' argument when calling 'from_pretrained'."
             )
+
+        cfg = OmegaConf.create(json.loads(cfg))
 
         model = SLAM(**cfg)
 
