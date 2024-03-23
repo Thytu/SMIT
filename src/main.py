@@ -155,11 +155,20 @@ def train_model(
             metric_key_prefix="validation"
         )
 
-    if step == TrainingStep.PRETRAINING:
+    torch.save(
+        model.linear_projector.state_dict(),
+        os.path.join(cfg[step].training_args.output_dir, "linear_projector.pth"),
+    )
+
+    if step == TrainingStep.TRAINING:
+
         torch.save(
-            model.linear_projector.state_dict(),
-            os.path.join(cfg.pretraining.training_args.output_dir, "linear_projector.pth"),
+            model.decoder.model.state_dict(),
+            os.path.join(cfg[step].training_args.output_dir, "decoder.pth"),
         )
+
+        trainer.save_model(os.path.join(cfg[step].training_args.output_dir, "final"))
+
 
 
 @hydra.main(version_base=None, config_path="../conf", config_name="default")
