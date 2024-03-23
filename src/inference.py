@@ -4,54 +4,22 @@ import torchaudio
 
 from SLAM import SLAM
 from omegaconf import DictConfig
-from safetensors import safe_open
 from datasets import load_from_disk
-from peft import LoraConfig, TaskType, get_peft_model
-
-
-def __load_weights(model, path_to_weights):
-    tensors = {}
-    with safe_open(path_to_weights, framework="pt") as f:
-        for k in f.keys():
-            tensors[k] = f.get_tensor(k)
-
-    model.load_state_dict(tensors)
-
-    return model
-
-# TODO: this should be integrated to SLAM
-def load_trained_model(cfg, path_to_weights):
-    model = SLAM(**cfg.model).eval()
-
-    if cfg.model.decoder.get("peft"):
-        peft_config = LoraConfig(**{
-            "task_type": TaskType.CAUSAL_LM,
-            "inference_mode": False,
-            **cfg.model.decoder["peft"],
-        })
-
-        model.decoder.model = get_peft_model(
-            model=model.decoder.model,
-            peft_config=peft_config,
-        )
-
-    return __load_weights(model, path_to_weights)
 
 
 def infer_over_audio(
-    cfg: DictConfig,
     path_to_model: str,
     save_audio_sample: bool = False,
 ):
 
     device_to_use = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    model = load_trained_model(cfg, path_to_model).to(device=device_to_use)
+    model = SLAM.from_pretrained(path_to_safetensors=path_to_model).to(device=device_to_use)
 
     validation_set = load_from_disk("outputs/dataset/")['validation']
 
     for i, sample in enumerate(iter(validation_set)):
-        if i >= 0 and sample["inputs"].get("raw_audio") is not None:
+        if i >= 10 and sample["inputs"].get("raw_audio") is not None:
             break
 
     raw_speech = sample["inputs"]["raw_audio"]
@@ -70,13 +38,12 @@ def infer_over_audio(
 
 
 def infer_over_instruction(
-    cfg: DictConfig,
     path_to_model: str,
 ):
 
     device_to_use = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    model = load_trained_model(cfg, path_to_model).to(device=device_to_use)
+    model = SLAM.from_pretrained(path_to_safetensors=path_to_model).to(device=device_to_use)
     tokenizer = model.decoder.tokenizer
 
     messages = [
@@ -106,16 +73,14 @@ def infer_over_instruction(
 @hydra.main(version_base=None, config_path="../conf", config_name="default")
 def main(cfg : DictConfig):
 
-    path_to_model = "/scratch/SMIT-ASR-outputs/model/checkpoint-33000/model.safetensors"
+    path_to_model = "./outputs/SMIT-Training-outputs/checkpoint-38000/model.safetensors"
 
     infer_over_audio(
-        cfg=cfg,
         path_to_model=path_to_model,
         save_audio_sample=True,
     )
 
     infer_over_instruction(
-        cfg=cfg,
         path_to_model=path_to_model,
     )
 
