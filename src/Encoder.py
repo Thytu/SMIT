@@ -21,8 +21,9 @@ class Encoder(nn.Module):
         )
         self.output_dim = self.model.config.hidden_size
 
-    # TODO: add call to self.feature_extractor when using SLAM.generate_transcript
     def forward(self, raw_speech: Tensor) -> Tensor:
+        # TODO: LLaVA showed that not using the last hidden state
+        # but the middle one can improve decoder's accuracy (investigate)
         return self.model(raw_speech).last_hidden_state
 
 
