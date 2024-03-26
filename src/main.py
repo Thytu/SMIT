@@ -139,7 +139,7 @@ def train_model(
         callbacks=callbacks,
     )
 
-    ctx = wandb.init(project=project) if (project := cfg[step].get("wandb_project_name")) is not None else nullcontext
+    ctx = wandb.init(project=project) if (project := cfg[step].get("wandb_project_name")) is not None else nullcontext()
 
     with ctx:
         trainer.train(
