@@ -63,6 +63,13 @@ class SLAM(nn.Module):
             tokenizer=self.decoder.tokenizer,
         )
 
+        self._freeze_nonlinear_layers()
+
+    def _freeze_nonlinear_layers(self):
+        for name, param in self.named_parameters():
+            if not any([linear_indicator in name for linear_indicator in ('fc', 'dense', 'linear')]):
+                param.requires_grad = False
+
     @classmethod
     def help(cls):
         print("TODO: help message")
