@@ -9,11 +9,6 @@ class DataCollator:
 
     processor: Wav2Vec2Processor
 
-    padding_inputs: Union[bool, str] = True
-    max_length_inputs: Optional[int] = None
-
-    padding_labels: Union[bool, str] = True
-    max_length_labels: Optional[int] = None
 
     def __call__(self, features: List[Dict[str, Union[List[int], Tensor]]]) -> Dict[str, Tensor]:
         return {

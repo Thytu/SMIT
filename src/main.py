@@ -94,12 +94,7 @@ def train_model(
         tokenizer=model.decoder.tokenizer,
     )
 
-    data_collator = DataCollator(
-        processor=processor,
-        padding_inputs=True,
-        padding_labels='max_length',
-        max_length_labels=model.decoder.tokenizer.model_max_length,
-    )
+    data_collator = DataCollator(processor=processor)
 
     dataset = load_from_disk("outputs/dataset/")
 
