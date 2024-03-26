@@ -12,14 +12,9 @@ datasets:
     subset: all
 
     splits:
-      train: train.other.500
-      test: test.other
-      validation: validation.other
-
-    filters:
-      is_shorter_than_model_max_length:
-        columns: ["labels", "inputs.instruct"]
-        safe_padding: 30
+      train: train.other.500[:130031] # set as 75% of the total data
+      test: test.other # set as 75% of the total data
+      validation: validation.other # set as 75% of the total data
 
   WizardLM/WizardLM_evol_instruct_70k:
     instruct_column: instruction # TODO: use this value to pre-process it according to encoder SR
@@ -27,9 +22,9 @@ datasets:
     label_column: output # TODO: use this value to pre-process it according to encoder SR
 
     splits:
-      train: train[:25000]
-      test: train[25000:37500]
-      validation: train[37500:45000]
+      train: train[:25000] # set as 25% of the total data
+      test: train[25000:25979] # set as 25% of the total data
+      validation: train[26000:26954] # set as 25% of the total data
 
     filters:
       is_shorter_than_model_max_length:
