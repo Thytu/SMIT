@@ -35,7 +35,7 @@ datasets:
         columns: ["labels", "inputs.instruct"]
         value: 0
 
-# Deactivated by default to make the training process faster but you're encouraged to do pretraining
+# Deactivated by default to make the training process faster but you're encouraged to try pretraining
 # pretraining:
 #   wandb_project_name: SMIT-Pretraining
 #   early_stopping_patience: 5
