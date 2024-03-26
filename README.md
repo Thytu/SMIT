@@ -1,16 +1,32 @@
 <div id="top"></div>
 
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![PUll Request][pr-shield]][pr-url]
-[![MIT License][license-shield]][license-url]
-
 <br />
 <div align="center">
-  <a href="https://github.com/Thytu/SMIT">
+
+  
+  <a href="https://github.com/Thytu/SMIT/graphs/contributors">
+    <img src="https://img.shields.io/github/contributors/Thytu/SMIT.svg?style=for-the-badge&color=blue" alt="Logo">
+  </a>
+  <a href="https://github.com/Thytu/SMIT/network/members">
+    <img src="https://img.shields.io/github/forks/Thytu/SMIT.svg?style=for-the-badge&color=blue" alt="Logo">
+  </a>
+  <a href="https://github.com/Thytu/SMIT/stargazers">
+    <img src="https://img.shields.io/github/stars/Thytu/SMIT.svg?style=for-the-badge&color=yellow" alt="Logo">
+  </a>
+  <a href="https://github.com/Thytu/SMIT/issues">
+    <img src="https://img.shields.io/github/issues/Thytu/SMIT.svg?style=for-the-badge&" alt="Logo">
+  </a>
+  <a href="https://github.com/Thytu/SMIT/pulls">
+    <img src="https://img.shields.io/github/issues-pr/Thytu/SMIT.svg?style=for-the-badge" alt="Logo">
+  </a>
+  <a href="https://github.com/Thytu/SMIT/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/Thytu/SMIT.svg?style=for-the-badge&color=indigo" alt="Logo">
+  </a>
+
+  <br/>
+  <br />
+  
+  <a href="https://github.com/Thytu/SMIT/network/members">
     <img src="https://repository-images.githubusercontent.com/763042457/1d2a98b1-5e63-4416-9da2-6b432fcb0726" alt="Logo">
   </a>
 
@@ -134,16 +150,4 @@ You can reach me out at vltn.dematos@gmail.com and if you want more information 
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/Thytu/SMIT.svg?style=for-the-badge&color=blue
-[contributors-url]: https://github.com/Thytu/SMIT/graphs/contributors
-[pr-shield]: https://img.shields.io/github/issues-pr/Thytu/SMIT.svg?style=for-the-badge
-[pr-url]: https://github.com/Thytu/SMIT/pulls
 [issues]: https://img.shields.io/github/issues/Thytu/SMIT
-[forks-shield]: https://img.shields.io/github/forks/Thytu/SMIT.svg?style=for-the-badge&color=blue
-[forks-url]: https://github.com/Thytu/SMIT/network/members
-[stars-shield]: https://img.shields.io/github/stars/Thytu/SMIT.svg?style=for-the-badge&color=yellow
-[stars-url]: https://github.com/Thytu/SMIT/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Thytu/SMIT.svg?style=for-the-badge&
-[issues-url]: https://github.com/Thytu/SMIT/issues
-[license-shield]: https://img.shields.io/github/license/Thytu/SMIT.svg?style=for-the-badge&color=indigo
-[license-url]: https://github.com/Thytu/SMIT/blob/master/LICENSE
