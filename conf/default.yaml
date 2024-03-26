@@ -42,8 +42,8 @@ datasets:
 #   resume_from_checkpoint: null
 #   training_args:
 #     save_only_model: True
-#     output_dir: ./SMIT-alignement-outputs/
-#     # group_by_length=True, # Makes the training init super long (~2h)
+#     output_dir: ./outputs/SMIT-Pretraining-outputs/
+#     # group_by_length=True # Makes the training init super long (~2h)
 #     bf16: True
 #     per_device_train_batch_size: 4
 #     per_device_eval_batch_size: 16
