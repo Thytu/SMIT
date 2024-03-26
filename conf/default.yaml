@@ -12,14 +12,9 @@ datasets:
     subset: all
 
     splits:
-      train: train.other.500
-      test: test.other
-      validation: validation.other
-
-    filters:
-      is_shorter_than_model_max_length:
-        columns: ["labels", "inputs.instruct"]
-        safe_padding: 30
+      train: train.other.500[:130031] # set as 75% of the total data
+      test: test.other # set as 75% of the total data
+      validation: validation.other # set as 75% of the total data
 
   WizardLM/WizardLM_evol_instruct_70k:
     instruct_column: instruction # TODO: use this value to pre-process it according to encoder SR
@@ -27,9 +22,9 @@ datasets:
     label_column: output # TODO: use this value to pre-process it according to encoder SR
 
     splits:
-      train: train[:25000]
-      test: train[25000:37500]
-      validation: train[37500:45000]
+      train: train[:25000] # set as 25% of the total data
+      test: train[25000:25979] # set as 25% of the total data
+      validation: train[26000:26954] # set as 25% of the total data
 
     filters:
       is_shorter_than_model_max_length:
@@ -40,15 +35,15 @@ datasets:
         columns: ["labels", "inputs.instruct"]
         value: 0
 
-# Deactivated by default to make the training process faster but you're encouraged to do pretraining
+# Deactivated by default to make the training process faster but you're encouraged to try pretraining
 # pretraining:
 #   wandb_project_name: SMIT-Pretraining
 #   early_stopping_patience: 5
 #   resume_from_checkpoint: null
 #   training_args:
 #     save_only_model: True
-#     output_dir: ./SMIT-alignement-outputs/
-#     # group_by_length=True, # Makes the training init super long (~2h)
+#     output_dir: ./outputs/SMIT-Pretraining-outputs/
+#     # group_by_length=True # Makes the training init super long (~2h)
 #     bf16: True
 #     per_device_train_batch_size: 4
 #     per_device_eval_batch_size: 16
@@ -70,12 +65,12 @@ training:
   early_stopping_patience: 5
   resume_from_checkpoint: null
   training_args:
-    output_dir: ./SMIT-ASR-outputs/model/
-    # group_by_length=True, # Makes the training init super long (~2h)
+    output_dir: "./outputs/SMIT-Training-outputs/"
+    # group_by_length=True # Makes the training init super long (~2h)
     bf16: True
-    per_device_train_batch_size: 2
-    gradient_accumulation_steps: 2
-    per_device_eval_batch_size: 2
+    per_device_train_batch_size: 1
+    gradient_accumulation_steps: 4
+    per_device_eval_batch_size: 1
     evaluation_strategy: "steps"
     eval_steps: 2000
     save_steps: 2000

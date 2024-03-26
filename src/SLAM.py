@@ -58,14 +58,17 @@ class SLAM(nn.Module):
             output_dim=self.decoder.model.config.hidden_size,
         )
 
-        self.processor = None
+        self.processor = Wav2Vec2Processor(
+            feature_extractor=self.encoder.feature_extractor,
+            tokenizer=self.decoder.tokenizer,
+        )
 
-    def _init_processor(self):
-        if self.processor is None:
-            self.processor = Wav2Vec2Processor(
-                feature_extractor=self.encoder.feature_extractor,
-                tokenizer=self.decoder.tokenizer,
-            )
+        self._freeze_nonlinear_layers()
+
+    def _freeze_nonlinear_layers(self):
+        for name, param in self.named_parameters():
+            if not any([linear_indicator in name for linear_indicator in ('fc', 'dense', 'linear')]):
+                param.requires_grad = False
 
     @classmethod
     def help(cls):
@@ -179,12 +182,10 @@ class SLAM(nn.Module):
 
         return self.decoder(inputs)
 
-    # TODO: handle batch as input
     # TODO: change default max_length to decoder's max_length
     # TODO: replace by a SLAM.generate that supports {audio} key word
     # ie. generate(prompt="Transcribe speech to text {audio}", raw_speech)
     def generate_transcript(self, raw_speech: Union[Tensor, List[Tensor]], max_length: int = 512) -> Tensor:
-        self._init_processor()
 
         encoder_input = raw_speech
 

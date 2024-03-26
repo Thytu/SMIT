@@ -1,9 +1,7 @@
 import torch
-import hydra
 import torchaudio
 
 from SLAM import SLAM
-from omegaconf import DictConfig
 from datasets import load_from_disk
 
 
@@ -70,8 +68,7 @@ def infer_over_instruction(
     print(completion)
 
 
-@hydra.main(version_base=None, config_path="../conf", config_name="default")
-def main(cfg : DictConfig):
+def main():
 
     path_to_model = "./outputs/SMIT-Training-outputs/checkpoint-38000/model.safetensors"
 
