@@ -19,12 +19,9 @@
   <a href="https://github.com/Thytu/SMIT/pulls">
     <img src="https://img.shields.io/github/issues-pr/Thytu/SMIT.svg?style=for-the-badge" alt="Logo">
   </a>
-  <a href="https://github.com/Thytu/SMIT/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/Thytu/SMIT.svg?style=for-the-badge&color=indigo" alt="Logo">
-  </a>
 
   <br/>
-  <br />
+  <br/>
   
   <a href="https://github.com/Thytu/SMIT/network/members">
     <img src="https://repository-images.githubusercontent.com/763042457/1d2a98b1-5e63-4416-9da2-6b432fcb0726" alt="Logo">
