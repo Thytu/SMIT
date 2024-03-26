@@ -11,7 +11,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Thytu/SMIT">
-    <img src="https://i.ibb.co/cY65gkZ/SMIT-logo-v1.webp" alt="Logo" width="80%" height="80%">
+    <img src="https://repository-images.githubusercontent.com/763042457/1d2a98b1-5e63-4416-9da2-6b432fcb0726" alt="Logo">
   </a>
 
   <h3 align="center" style="font-size: 200%">SMIT</h3>
