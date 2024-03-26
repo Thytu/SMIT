@@ -58,14 +58,10 @@ class SLAM(nn.Module):
             output_dim=self.decoder.model.config.hidden_size,
         )
 
-        self.processor = None
-
-    def _init_processor(self):
-        if self.processor is None:
-            self.processor = Wav2Vec2Processor(
-                feature_extractor=self.encoder.feature_extractor,
-                tokenizer=self.decoder.tokenizer,
-            )
+        self.processor = Wav2Vec2Processor(
+            feature_extractor=self.encoder.feature_extractor,
+            tokenizer=self.decoder.tokenizer,
+        )
 
     @classmethod
     def help(cls):
