@@ -182,7 +182,6 @@ class SLAM(nn.Module):
 
         return self.decoder(inputs)
 
-    # TODO: handle batch as input
     # TODO: change default max_length to decoder's max_length
     # TODO: replace by a SLAM.generate that supports {audio} key word
     # ie. generate(prompt="Transcribe speech to text {audio}", raw_speech)
