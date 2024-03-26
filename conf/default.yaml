@@ -70,8 +70,8 @@ training:
   early_stopping_patience: 5
   resume_from_checkpoint: null
   training_args:
-    output_dir: ./SMIT-ASR-outputs/model/
-    # group_by_length=True, # Makes the training init super long (~2h)
+    output_dir: "./outputs/SMIT-Training-outputs/"
+    # group_by_length=True # Makes the training init super long (~2h)
     bf16: True
     per_device_train_batch_size: 2
     gradient_accumulation_steps: 2
