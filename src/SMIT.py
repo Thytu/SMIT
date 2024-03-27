@@ -23,20 +23,20 @@ from transformers.generation import (
 
 
 @dataclass
-class SLAMInput(OrderedDict):
+class SMITInput(OrderedDict):
     instruct: str = None
     instruct_ids: Optional[Union[List[int], Tensor]] = None
     raw_audio: Optional[Tensor] = None
 
 
-class SLAM(nn.Module):
+class SMIT(nn.Module):
     def __init__(self, *args, **kwargs) -> None:
 
         if "encoder" not in kwargs:
-            raise ValueError("SLAM expects to receive a dict named 'encoder' as input. See SLAM.help()")
+            raise ValueError("SMIT expects to receive a dict named 'encoder' as input. See SMIT.help()")
 
         if "decoder" not in kwargs:
-            raise ValueError("SLAM expects to receive a dict named 'decoder' as input. See SLAM.help()")
+            raise ValueError("SMIT expects to receive a dict named 'decoder' as input. See SMIT.help()")
 
         self.cfg = {
             "encoder": OmegaConf.to_container(kwargs.pop("encoder")),
@@ -105,7 +105,7 @@ class SLAM(nn.Module):
 
         cfg = OmegaConf.create(json.loads(cfg))
 
-        model = SLAM(**cfg)
+        model = SMIT(**cfg)
 
         if cfg.decoder.get("peft"):
 
@@ -147,28 +147,28 @@ class SLAM(nn.Module):
     def forward(
         self,
         inputs: Union[
-            SLAMInput,
+            SMITInput,
             Dict[str, Union[str, Tensor, None]],
-            List[SLAMInput],
+            List[SMITInput],
             List[Dict[str, Union[str, Tensor, None]]],
         ],
         labels: Optional[Tensor] = None,
     ) -> CausalLMOutputWithPast:
 
-        if isinstance(inputs, (dict, SLAMInput)):
+        if isinstance(inputs, (dict, SMITInput)):
             inputs = [inputs]
 
         for idx, _input in enumerate(inputs):
 
-            if isinstance(_input, dict) and not isinstance(_input, SLAMInput):
-                inputs[idx] = SLAMInput(
+            if isinstance(_input, dict) and not isinstance(_input, SMITInput):
+                inputs[idx] = SMITInput(
                     instruct=_input.get("instruct"),
                     instruct_ids=_input.get("instruct_ids"),
                     raw_audio=_input["raw_audio"],
                 )
 
             if inputs[idx].instruct is None and inputs[idx].instruct_ids is None:
-                raise RuntimeError("SLAMInput must contains either instruct or instruct_ids.")
+                raise RuntimeError("SMITInput must contains either instruct or instruct_ids.")
 
         if labels is None:
             labels = [None] * len(inputs)
@@ -183,7 +183,7 @@ class SLAM(nn.Module):
         return self.decoder(inputs)
 
     # TODO: change default max_length to decoder's max_length
-    # TODO: replace by a SLAM.generate that supports {audio} key word
+    # TODO: replace by a SMIT.generate that supports {audio} key word
     # ie. generate(prompt="Transcribe speech to text {audio}", raw_speech)
     def generate_transcript(self, raw_speech: Union[Tensor, List[Tensor]], max_length: int = 512) -> Tensor:
 
@@ -255,7 +255,7 @@ if __name__ == "__main__":
 
     device_to_use = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    model = SLAM(
+    model = SMIT(
         decoder={
             "model_name": "abacaj/phi-2-super"
         },
@@ -265,7 +265,7 @@ if __name__ == "__main__":
         }
     ).eval().to(device_to_use)
 
-    dummy_input_values = SLAMInput(
+    dummy_input_values = SMITInput(
         instruct=(f"{model.decoder.tokenizer.eos_token}[INST]" " Transcribe speech to text {audio} [/INST]"),
         raw_audio=torch.randn((258560), device=device_to_use),
     )

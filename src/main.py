@@ -6,7 +6,7 @@ import hydra
 import torch
 import numpy as np
 
-from SLAM import SLAM
+from SMIT import SMIT
 from omegaconf import DictConfig, OmegaConf
 from safetensors import safe_open
 from typing import Dict, Optional
@@ -81,7 +81,7 @@ def train_model(
     path_to_projector: Optional[str] = None,
 ):
 
-    model = SLAM(**cfg.model)
+    model = SMIT(**cfg.model)
 
     if path_to_projector is not None:
         model.linear_projector.load_state_dict(

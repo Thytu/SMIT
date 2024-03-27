@@ -1,7 +1,7 @@
 import torch
 import torchaudio
 
-from SLAM import SLAM
+from SMIT import SMIT
 from datasets import load_from_disk
 
 
@@ -12,7 +12,7 @@ def infer_over_audio(
 
     device_to_use = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    model = SLAM.from_pretrained(path_to_safetensors=path_to_model).to(device=device_to_use)
+    model = SMIT.from_pretrained(path_to_safetensors=path_to_model).to(device=device_to_use)
 
     validation_set = load_from_disk("outputs/dataset/")['validation']
 
@@ -41,7 +41,7 @@ def infer_over_instruction(
 
     device_to_use = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    model = SLAM.from_pretrained(path_to_safetensors=path_to_model).to(device=device_to_use)
+    model = SMIT.from_pretrained(path_to_safetensors=path_to_model).to(device=device_to_use)
     tokenizer = model.decoder.tokenizer
 
     messages = [
