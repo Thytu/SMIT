@@ -47,7 +47,7 @@
   <summary>Table of Contents</summary>
   <ol>
     <li><a href="#about-the-project">About The Project</a></li>
-    <li><a href="#usage">Usage</a></li>
+    <li><a href="#how-it-works">How it works</a></li>
     <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
@@ -66,7 +66,7 @@ SMIT is a versatile tool designed to streamline the integration of audio modalit
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
-## Usage
+## How it works
 
 SMIT simplifies the process of enhancing your LLM with audio capabilities, following the principles outlined in the [this paper](https://arxiv.org/abs/2402.08846). By linking a speech encoder to an decoder using a trainable linear projector adding to your LLM the audio modality. SLMA automates the integration process by making it as easy as configuring a single file.
 
