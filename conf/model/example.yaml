@@ -6,3 +6,8 @@ decoder:
   model_name: "abacaj/phi-2-super"
   audio_placeholder: null # uses default one
   prompt_template: null # uses default one
+
+  quantization_config:
+    load_in_4bit: True
+    bnb_4bit_quant_type: nf4
+    bnb_4bit_compute_dtype: float16 # bfloat16 (only >=Ampere)

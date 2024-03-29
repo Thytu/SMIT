@@ -65,10 +65,12 @@ training:
   early_stopping_patience: 5
   resume_from_checkpoint: null
   training_args:
+    optim: adamw_bnb_8bit
     output_dir: "./outputs/SMIT-Training-outputs/"
     # group_by_length=True # Makes the training init super long (~2h)
     bf16: True
-    per_device_train_batch_size: 1
+    # tf32: True # should be activated when possible (only >=Ampere)
+    per_device_train_batch_size: 2
     gradient_accumulation_steps: 4
     per_device_eval_batch_size: 1
     evaluation_strategy: "steps"
@@ -76,10 +78,11 @@ training:
     save_steps: 2000
     logging_steps: 100
     learning_rate: 1e-4
-    max_steps: 75_000
+    max_steps: 25_000
     warmup_steps: 1_000
     save_total_limit: 6
     dataloader_num_workers: 16
+    dataloader_pin_memory: true
     report_to: "wandb"
     weight_decay: 0
     load_best_model_at_end: True
