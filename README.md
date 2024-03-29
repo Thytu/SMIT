@@ -70,26 +70,29 @@ SMIT is a versatile tool designed to streamline the integration of audio modalit
 
 Welcome to SMIT! Follow these simple steps to get started:
 
-**Clone the Repository**: Begin by cloning the SMIT repository to your local machine using Git:
+Begin by cloning the SMIT repository to your local machine using Git:
 ```sh
 git clone https://github.com/Thytu/SMIT/
 cd SMIT
 ```
 
-**Set Up Virtual Environment**: We highly recommend using a virtual environment to manage dependencies and prevent conflicts. Create and activate a virtual environment using your preferred tool (e.g., virtualenv, conda):
+We highly recommend using a virtual environment to manage dependencies and prevent conflicts. Create and activate a virtual environment using your preferred tool (e.g., virtualenv, conda):
+
 ```sh
 # Example using virtualenv
 virtualenv venv
 source venv/bin/activate
 ```
 
-**Install Dependencies**: Once inside the project directory and your virtual environment is activated, install the required dependencies listed in requirements.txt using pip:
+Once inside the project directory and your virtual environment is activated, install the required dependencies listed in requirements.txt using pip:
 
 ```sh
 pip install -r requirements.txt
 ```
 
-**Run the Example**: You can quickly run the default example provided in SMI by executing the following command:
+### Run the Example
+
+You can quickly run the default example provided in SMI by executing the following command:
 
 ```sh
 python src/main.py
@@ -104,13 +107,42 @@ This will train the amazing [abacaj/phi-2-super](https://huggingface.co/abacaj/p
 > python src/main.py ~model.decoder.quantization_config ++training.training_args.per_device_train_batch_size=1
 > ```
 
-**Customize Your Model**: To customize your own Language Model (LLM), create a [configuration file](docs/config-file.md). You can use the provided [config file template](config/default.yaml) as a starting point. Then, use [Hydra syntax](https://hydra.cc/docs/advanced/override_grammar/basic/) to provide your configuration file:
+### Customize Your Model
+
+To customize your own Language Model (LLM), create a [configuration file](docs/config-file.md). You can use the provided [config file template](config/default.yaml) as a starting point. Then, use [Hydra syntax](https://hydra.cc/docs/advanced/override_grammar/basic/) to provide your configuration file:
 
 ```sh
 python src/main.py model=my_config
 ```
 
-**Advanced Configuration**: Hydra offers extensive options for parameter overriding, allowing you to tailor the model according to your specific requirements. Refer to [Hydra documentation](https://hydra.cc/docs/intro/) for more details on customization options.
+Hydra offers extensive options for parameter overriding, allowing you to tailor the model according to your specific requirements. Refer to [Hydra documentation](https://hydra.cc/docs/intro/) for more details on customization options.
+
+### Inference
+
+Once your model is trained, you can effortlessly load it for inference:
+```py
+model = SMIT.from_pretrained("path_to_your_safetensor")
+```
+
+For inference tasks, you can utilize the `generate` method:
+```py
+model.generate("Tell me how to add a modality to my model")
+```
+
+To employ the `generate` method with multiple modalities, follow this approach:
+```py
+model.generate(
+    prompt=[
+        "Tell me how to add a modality to my model",
+        "Transcribe this audio from speech to text {audio}",
+    ],
+    raw_speech=[None, you_audio],
+)
+```
+
+> [!NOTE]
+> When providing multiple prompts, ensure that the length of `raw_speech` matches the length of `prompt`.
+
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
