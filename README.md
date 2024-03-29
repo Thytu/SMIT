@@ -108,12 +108,12 @@ python src/main.py
 
 This will train the amazing [abacaj/phi-2-super](https://huggingface.co/abacaj/phi-2-super/tree/main) model to do ASR using the `librispeech_asr` dataset and [facebook/hubert-large-ls960-ft](https://huggingface.co/facebook/hubert-large-ls960-ft) as speech encoder, reproducing the [Thytu/phi-2-audio-super](https://huggingface.co/Thytu/phi-2-audio-super/tree/main) model.
 
-> :warning: It's essential to ensure a minimum of 30GB of available VRAM to execute this command successfully.
-
-For users with >=80GB of VRAM, it's recommended to deactivate quantization while decreasing the batch size to expedite the training process. You can achieve this by running:
-```
-python src/main.py ~model.decoder.quantization_config ++training.training_args.per_device_train_batch_size=1
-```
+> [!IMPORTANT]
+> It's essential to ensure a minimum of 30GB of available VRAM to execute this command successfully.
+>  For users with >=80GB of VRAM, it's recommended to deactivate quantization while decreasing the batch size to expedite the training process. You can achieve this by running:
+> ```
+> python src/main.py ~model.decoder.quantization_config ++training.training_args.per_device_train_batch_size=1
+> ```
 
 **Customize Your Model**: To customize your own Language Model (LLM), create a [configuration file](docs/config-file.md). You can use the provided [config file template](config/default.yaml) as a starting point. Then, use [Hydra syntax](https://hydra.cc/docs/advanced/override_grammar/basic/) to provide your configuration file:
 
