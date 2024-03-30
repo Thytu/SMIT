@@ -16,6 +16,7 @@ from datasets import load_from_disk
 from safetensors.torch import save_file
 from evaluate import load as load_metric
 from DataCollator import DataCollator
+from data_handler import main as generate_dataset
 from transformers import (
     Trainer,
     TrainingArguments,
