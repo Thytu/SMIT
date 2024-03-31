@@ -8,8 +8,7 @@ def _access_value(dict_to_access, key_as_str):
     if "." in key_as_str:
         return functools.reduce(lambda d, k: d[k], key_as_str.split('.'), dict_to_access)
 
-    return dict_to_access
-
+    return dict_to_access[key_as_str]
 
 def is_shorter_than_model_max_length(columns: List[str], dataset, tokenizer, safe_padding: int = 0, **kwargs):
     model_max_length = tokenizer.model_max_length
